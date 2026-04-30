@@ -117,8 +117,7 @@ with tab_dobavljac:
         
         # Prikaz tabele
         st.dataframe(df_zahtevi[['artikl', 'kolicina_tražena', 'cena', 'Iznos', 'status']], use_container_width=True, hide_index=True)
-        # ... (ostatak koda)
-        
+                
         # Izbor zahteva za promenu statusa
         izabrani_index = st.number_input("Redni broj zahteva (0-indexed):", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
         
