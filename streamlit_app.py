@@ -29,35 +29,46 @@ with tab_kupac:
         artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(df_artikli['Artikl'].unique()))
         
         if artikl_za_izbor:
-            # Čitamo iz session_state, ne iz originalnog DataFrame-a
+            # Filtriramo dobavljače za izabrani artikl
             dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
             
             if not dostupni.empty:
-                # Prikazujemo dobavljače koji imaju taj artikl
+                # Prikazujemo tabelu sa trenutnim stanjem
                 st.dataframe(dostupni, hide_index=True)
                 
+                # Omogućavamo izbor dobavljača iz filtrirane liste
                 odabrani_dob = st.selectbox("Dobavljač:", dostupni['dobavljac'].unique())
                 tražena_kol = st.number_input("Količina (kg):", min_value=1)
                 
                 if st.button("Potvrdi i smanji zalihe"):
-                    # Logika smanjenja zaliha
-                    red = st.session_state.df_dobavljaci[(st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & 
-                                                         (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)]
-                    if tražena_kol <= red.iloc[0]['kolicina']:
-                        stavka = red.iloc[0].to_dict()
-                        stavka.update({'kupac': odabrani_kupac, 'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
-                        st.session_state.narudžbenica.append(stavka)
+                    # Pronalazimo indeks u originalnom DataFrame-u (session_state)
+                    # Koristimo .loc za sigurno filtriranje
+                    mask = (st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & \
+                           (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)
+                    
+                    if mask.any():
+                        idx = st.session_state.df_dobavljaci[mask].index[0]
+                        raspolozivo = st.session_state.df_dobavljaci.at[idx, 'kolicina']
                         
-                        idx = red.index[0]
-                        st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
-                        st.success("Dodato u narudžbinu!")
-                        st.rerun()
-                    else:
-                        st.error("Nedovoljno na stanju!")
+                        if tražena_kol <= raspolozivo:
+                            # 1. Priprema stavke
+                            stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
+                            stavka.update({'kupac': odabrani_kupac, 'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
+                            
+                            # 2. Ažuriranje narudžbenice
+                            st.session_state.narudžbenica.append(stavka)
+                            
+                            # 3. Smanjenje zaliha
+                            st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
+                            
+                            st.success(f"Uspešno naručeno {tražena_kol}kg od {odabrani_dob}.")
+                            st.rerun()
+                        else:
+                            st.error(f"Nedovoljno na stanju! Raspoloživo: {raspolozivo}kg.")
             else:
                 st.warning("Trenutno nema dobavljača za ovaj artikl.")
-    else:
-        st.info("Molimo izaberite artikl iz kataloga kako biste videli ponudu.")
+        else:
+            st.info("Molimo izaberite artikl iz kataloga.")
 
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
