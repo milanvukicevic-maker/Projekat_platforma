@@ -100,7 +100,6 @@ with tab_kupac:
             hide_index=True
         )
         
-        df_status = pd.DataFrame(st.session_state.narudžbenica)
         # Prikazujemo samo dostupne kolone
         st.dataframe(df_status[['artikl', 'status']], use_container_width=True, hide_index=True)
     else:
