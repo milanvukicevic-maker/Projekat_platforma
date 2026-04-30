@@ -43,13 +43,23 @@ with tab_kupac:
         st.session_state.kolicina_trenutna = kolicina
 
     if 'trazeni_rezultati' in st.session_state and st.session_state.trazeni_rezultati:
-        st.table(pd.DataFrame(st.session_state.trazeni_rezultati))
-        izabrani_dob = st.selectbox("Izaberite dobavljača za potvrdu:", [d['dobavljac'] for d in st.session_state.trazeni_rezultati])
-        if st.button("Dodaj u narudžbinu"):
-            stavka = next(d for d in st.session_state.trazeni_rezultati if d['dobavljac'] == izabrani_dob).copy()
-            stavka.update({'artikl': st.session_state.artikl_trenutni, 'kolicina_tražena': st.session_state.kolicina_trenutna, 'status': 'Čeka'})
-            st.session_state.narudžbenica.append(stavka)
-            st.success("Dodato u narudžbinu!")
+        df_rez = pd.DataFrame(st.session_state.trazeni_rezultati)
+        st.write("Dostupni dobavljači za vašu količinu:")
+        
+        # Prikazujemo sve dostupne dobavljače kao listu gde kupac može dodavati redom
+        for idx, row in df_rez.iterrows():
+            with st.expander(f"{row['dobavljac']} — Cena: {row['cena']} RSD (Na stanju: {row['kolicina']})"):
+                kolicina_za_ovog = st.number_input(f"Koliko uzimate od {row['dobavljac']}?", 
+                                                 min_value=0, max_value=int(row['kolicina']), 
+                                                 key=f"kolicina_{idx}")
+                if st.button(f"Dodaj u korpu od {row['dobavljac']}", key=f"btn_{idx}"):
+                    if kolicina_za_ovog > 0:
+                        stavka = row.to_dict()
+                        stavka['artikl'] = st.session_state.artikl_trenutni
+                        stavka['kolicina_tražena'] = kolicina_za_ovog
+                        stavka['status'] = 'Čeka'
+                        st.session_state.narudžbenica.append(stavka)
+                        st.success(f"Dodato {kolicina_za_ovog}kg od {row['dobavljac']}")
 
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
