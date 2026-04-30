@@ -5,7 +5,7 @@ import time
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
 st.title("KAIZA B2B Platforma")
 
-# 1. BAZE
+# 1. BAZE (Artikli, Kupci, Dobavljači)
 if 'df_dobavljaci' not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
@@ -28,37 +28,41 @@ with tab_kupac:
     artikl_za_izbor = st.selectbox("Artikl:", [""] + list(df_artikli['Artikl'].unique()))
     
     if odabrani_kupac and artikl_za_izbor:
-        # Filtriramo bazu
-        mask = st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor
-        dostupni = st.session_state.df_dobavljaci[mask].copy()
-        
+        dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor].copy()
         if not dostupni.empty:
+            st.write("Unesite količine kod željenih dobavljača:")
             dostupni['Unos_Količine'] = 0
-            editor = st.data_editor(dostupni, hide_index=False, column_config={"Unos_Količine": st.column_config.NumberColumn(min_value=0)})
+            editor = st.data_editor(dostupni, hide_index=True, column_config={"Unos_Količine": st.column_config.NumberColumn(min_value=0)})
             
             if st.button("Potvrdi i naruči"):
-                # Pronalazimo promene direktno kroz editor
-                for idx, row in editor.iterrows():
-                    kol = row['Unos_Količine']
-                    if kol > 0:
-                        # Pronađi originalni red u session_state bazi
-                        orig_idx = idx 
-                        if kol <= st.session_state.df_dobavljaci.at[orig_idx, 'kolicina']:
-                            stavka = st.session_state.df_dobavljaci.loc[orig_idx].to_dict()
-                            stavka.update({'id': f"{time.time()}_{orig_idx}", 'kupac': odabrani_kupac, 'kolicina_tražena': kol, 'status': 'Čeka'})
-                            
-                            st.session_state.narudžbenica.append(stavka)
-                            st.session_state.df_dobavljaci.at[orig_idx, 'kolicina'] -= kol
-                        else:
-                            st.error(f"Nedovoljno zaliha kod {row['dobavljac']}!")
+                za_porucivanje = editor[editor['Unos_Količine'] > 0]
+                for idx, row in za_porucivanje.iterrows():
+                    original_idx = row.name
+                    if row['Unos_Količine'] <= st.session_state.df_dobavljaci.at[original_idx, 'kolicina']:
+                        stavka = row.to_dict()
+                        stavka.update({
+                            'id': f"{int(time.time())}_{row['dobavljac']}",
+                            'kupac': odabrani_kupac,
+                            'kolicina_tražena': row['Unos_Količine'],
+                            'status': 'Čeka'
+                        })
+                        st.session_state.narudžbenica.append(stavka)
+                        st.session_state.df_dobavljaci.at[original_idx, 'kolicina'] -= row['Unos_Količine']
+                        st.success(f"Naručeno od {row['dobavljac']}!")
+                    else: st.error(f"Nedovoljno na stanju kod {row['dobavljac']}!")
                 st.rerun()
+
+    st.subheader("Vaša narudžbenica")
+    if st.session_state.narudžbenica:
+        df_k = pd.DataFrame(st.session_state.narudžbenica)
+        st.dataframe(df_k[['artikl', 'dobavljac', 'kolicina_tražena', 'status']], hide_index=True)
 
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     if st.session_state.narudžbenica:
         for i, stavka in enumerate(st.session_state.narudžbenica):
-            cols = st.columns([4, 1, 1])
-            cols[0].write(f"{stavka['kupac']} | {stavka['artikl']} ({stavka['kolicina_tražena']}kg) | Status: {stavka['status']}")
+            cols = st.columns([3, 1, 1])
+            cols[0].write(f"{stavka['kupac']} | {stavka['artikl']} ({stavka['kolicina_tražena']}kg) | {stavka['status']}")
             if cols[1].button("✅", key=f"p_{stavka['id']}"):
                 st.session_state.narudžbenica[i]['status'] = 'Prihvaćeno'
                 st.rerun()
