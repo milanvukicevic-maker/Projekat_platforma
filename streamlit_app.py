@@ -23,9 +23,11 @@ with tab_kupac:
     dobavljaci_za_artikl = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
     
     if not dobavljaci_za_artikl.empty:
-        st.dataframe(dobavljaci_za_artikli, hide_index=True)
+        # Ovde je bila greška, promenljiva mora da se zove isto:
+        st.dataframe(dobavljaci_za_artikl, hide_index=True)
         
         odabrani_dob = st.selectbox("Izaberite dobavljača:", dobavljaci_za_artikl['dobavljac'].unique())
+        # ... ostatak koda ...
         tražena_kol = st.number_input("Količina:", min_value=1)
         
         if st.button("Potvrdi narudžbinu"):
