@@ -28,23 +28,29 @@ with tab_kupac:
     artikl_za_izbor = st.selectbox("Artikl:", [""] + list(df_artikli['Artikl'].unique()))
     
     if odabrani_kupac and artikl_za_izbor:
-        dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
+        dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor].copy()
         if not dostupni.empty:
-            st.dataframe(dostupni, hide_index=True)
-            odabrani_dob = st.selectbox("Dobavljač:", dostupni['dobavljac'].unique())
-            tražena_kol = st.number_input("Količina (kg):", min_value=1)
+            st.write("Unesite količine kod željenih dobavljača:")
+            dostupni['Unos_Količine'] = 0
+            editor = st.data_editor(dostupni, hide_index=True, column_config={"Unos_Količine": st.column_config.NumberColumn(min_value=0)})
             
-            if st.button("Naruči"):
-                mask = (st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)
-                idx = st.session_state.df_dobavljaci[mask].index[0]
-                if tražena_kol <= st.session_state.df_dobavljaci.at[idx, 'kolicina']:
-                    stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
-                    stavka.update({'id': f"{int(time.time())}", 'kupac': odabrani_kupac, 'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
-                    st.session_state.narudžbenica.append(stavka)
-                    st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
-                    st.success("Dodato!")
-                    st.rerun()
-                else: st.error("Nedovoljno na stanju!")
+            if st.button("Potvrdi i naruči"):
+                za_porucivanje = editor[editor['Unos_Količine'] > 0]
+                for idx, row in za_porucivanje.iterrows():
+                    original_idx = row.name
+                    if row['Unos_Količine'] <= st.session_state.df_dobavljaci.at[original_idx, 'kolicina']:
+                        stavka = row.to_dict()
+                        stavka.update({
+                            'id': f"{int(time.time())}_{row['dobavljac']}",
+                            'kupac': odabrani_kupac,
+                            'kolicina_tražena': row['Unos_Količine'],
+                            'status': 'Čeka'
+                        })
+                        st.session_state.narudžbenica.append(stavka)
+                        st.session_state.df_dobavljaci.at[original_idx, 'kolicina'] -= row['Unos_Količine']
+                        st.success(f"Naručeno od {row['dobavljac']}!")
+                    else: st.error(f"Nedovoljno na stanju kod {row['dobavljac']}!")
+                st.rerun()
 
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
@@ -57,10 +63,10 @@ with tab_dobavljac:
         for i, stavka in enumerate(st.session_state.narudžbenica):
             cols = st.columns([3, 1, 1])
             cols[0].write(f"{stavka['kupac']} | {stavka['artikl']} ({stavka['kolicina_tražena']}kg) | {stavka['status']}")
-            if cols[1].button("✅", key=f"p_{stavka['id']}_{i}"):
+            if cols[1].button("✅", key=f"p_{stavka['id']}"):
                 st.session_state.narudžbenica[i]['status'] = 'Prihvaćeno'
                 st.rerun()
-            if cols[2].button("❌", key=f"o_{stavka['id']}_{i}"):
+            if cols[2].button("❌", key=f"o_{stavka['id']}"):
                 st.session_state.narudžbenica[i]['status'] = 'Odbijeno'
                 st.rerun()
     else: st.info("Nema zahteva.")
