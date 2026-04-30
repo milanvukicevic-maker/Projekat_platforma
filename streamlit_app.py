@@ -21,35 +21,41 @@ tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
 with tab_kupac:
     st.header("Upravljačka tabla — KUPAC")
-    # 1. Kupac: Dodajemo praznu opciju na početak, da ne bira odmah Moskvu
+    
+    # 1. Kupac: Dodajemo praznu opciju na početak
     odabrani_kupac = st.selectbox("Izaberite vašu firmu:", [""] + list(df_kupci['Naziv_Firme'].unique()))
     
     if odabrani_kupac:
         artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(df_artikli['Artikl'].unique()))
         
         if artikl_za_izbor:
-            # UVEK čitamo iz session_state, ne iz originalnog DataFrame-a
+            # Čitamo iz session_state, ne iz originalnog DataFrame-a
             dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
             
             if not dostupni.empty:
-                # Prikazujemo SVE dobavljače koji imaju taj artikl
-                st.dataframe(dostupni, hide_index=True)            st.dataframe(dostupni, hide_index=True)
-            odabrani_dob = st.selectbox("Dobavljač:", dostupni['dobavljac'].unique())
-            tražena_kol = st.number_input("Količina (kg):", min_value=1)
-            
-            if st.button("Potvrdi i smanji zalihe"):
-                red = st.session_state.df_dobavljaci[(st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)]
-                if tražena_kol <= red.iloc[0]['kolicina']:
-                    stavka = red.iloc[0].to_dict()
-                    stavka.update({'kupac': odabrani_kupac, 'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
-                    st.session_state.narudžbenica.append(stavka)
-                    st.session_state.df_dobavljaci.at[red.index[0], 'kolicina'] -= tražena_kol
-                    st.success("Dodato!")
-                    st.rerun()
-                else:
-                    st.error("Nedovoljno na stanju!")
-        else:
-            st.warning("Trenutno nema dobavljača za ovaj artikl.")
+                # Prikazujemo dobavljače koji imaju taj artikl
+                st.dataframe(dostupni, hide_index=True)
+                
+                odabrani_dob = st.selectbox("Dobavljač:", dostupni['dobavljac'].unique())
+                tražena_kol = st.number_input("Količina (kg):", min_value=1)
+                
+                if st.button("Potvrdi i smanji zalihe"):
+                    # Logika smanjenja zaliha
+                    red = st.session_state.df_dobavljaci[(st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & 
+                                                         (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)]
+                    if tražena_kol <= red.iloc[0]['kolicina']:
+                        stavka = red.iloc[0].to_dict()
+                        stavka.update({'kupac': odabrani_kupac, 'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
+                        st.session_state.narudžbenica.append(stavka)
+                        
+                        idx = red.index[0]
+                        st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
+                        st.success("Dodato u narudžbinu!")
+                        st.rerun()
+                    else:
+                        st.error("Nedovoljno na stanju!")
+            else:
+                st.warning("Trenutno nema dobavljača za ovaj artikl.")
     else:
         st.info("Molimo izaberite artikl iz kataloga kako biste videli ponudu.")
 
