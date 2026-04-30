@@ -1,73 +1,52 @@
 import streamlit as st
 import pandas as pd
 
-# 1. PODACI (Katalozi)
-katalog = {
-    "Meso": {"Juneće meso": ["Ramstek", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Rozbif", "File", "Koljenica"],
-             "Svinjsko meso": ["Kare", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Trbušina", "Koljenica", "File"]},
-    "Povrće": {"Plodovito povrće": ["Paradajz", "Paprika", "Tikvice", "Patlidžan", "Krastavac", "Brokoli", "Karfiol"]}
-}
+# Inicijalna baza dobavljača
+if 'df_dobavljaci' not in st.session_state:
+    st.session_state.df_dobavljaci = pd.DataFrame([
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
+        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
+    ])
 
-df_artikli = pd.DataFrame([{"Grupa": g, "Kategorija": k, "Artikl": a} 
-                           for g, kat in katalog.items() for k, arts in kat.items() for a in arts])
-
-df_dobavljaci = pd.DataFrame([
-    {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-    {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
-])
-
-# 2. FUNKCIJE
-def nadji_dobavljace(artikl):
-    return df_dobavljaci[df_dobavljaci['artikl'] == artikl]
-
-def filtriraj_dobavljace(df, trazena):
-    return df[df['kolicina'] >= trazena].sort_values(by='poeni', ascending=False)
-
-# 3. INICIJALIZACIJA
-if 'narudžbenica' not in st.session_state: st.session_state.narudžbenica = []
+# Inicijalizacija narudžbenice
+if 'narudžbenica' not in st.session_state:
+    st.session_state.narudžbenica = []
 
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
-st.title("KAIZA B2B Platforma")
 
-# 4. INTERFEJS
-tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC (Hotel Moskva)", "🚛 DOBAVLJAČ (Meso-Prom)"])
+tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
 with tab_kupac:
-    st.header("Upravljačka tabla — KUPAC")
-    artikl_za_izbor = st.selectbox("Izaberite artikl:", df_artikli['Artikl'].unique())
-    kolicina = st.number_input("Količina:", min_value=1, value=10)
+    artikl_za_izbor = st.selectbox("Izaberite artikl:", ["Ramstek", "Paradajz"]) # Dodajte ostatak iz kataloga
     
-    if st.button("Pronađi dobavljače"):
-        st.session_state.trazeni_rezultati = filtriraj_dobavljace(nadji_dobavljace(artikl_za_izbor), kolicina).to_dict('records')
-        st.session_state.artikl_trenutni = artikl_za_izbor
-        st.session_state.kolicina_trenutna = kolicina
-
-    if 'trazeni_rezultati' in st.session_state and st.session_state.trazeni_rezultati:
-        df_rez = pd.DataFrame(st.session_state.trazeni_rezultati)
-        st.write("Dostupni dobavljači za vašu količinu:")
+    # Pretraga u session_state bazi
+    dobavljaci_za_artikl = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
+    
+    if not dobavljaci_za_artikl.empty:
+        st.dataframe(dobavljaci_za_artikli, hide_index=True)
         
-        # Prikazujemo sve dostupne dobavljače kao listu gde kupac može dodavati redom
-        for idx, row in df_rez.iterrows():
-            with st.expander(f"{row['dobavljac']} — Cena: {row['cena']} RSD (Na stanju: {row['kolicina']})"):
-                kolicina_za_ovog = st.number_input(f"Koliko uzimate od {row['dobavljac']}?", 
-                                                 min_value=0, max_value=int(row['kolicina']), 
-                                                 key=f"kolicina_{idx}")
-                if st.button(f"Dodaj u korpu od {row['dobavljac']}", key=f"btn_{idx}"):
-                    if kolicina_za_ovog > 0:
-                        stavka = row.to_dict()
-                        stavka['artikl'] = st.session_state.artikl_trenutni
-                        stavka['kolicina_tražena'] = kolicina_za_ovog
-                        stavka['status'] = 'Čeka'
-                        st.session_state.narudžbenica.append(stavka)
-                        st.success(f"Dodato {kolicina_za_ovog}kg od {row['dobavljac']}")
-
-    st.subheader("Vaša narudžbenica")
-    if st.session_state.narudžbenica:
-        df_k = pd.DataFrame(st.session_state.narudžbenica)
-        df_k['Iznos'] = df_k['kolicina_tražena'] * df_k['cena']
-        st.dataframe(df_k[['artikl', 'dobavljac', 'kolicina_tražena', 'cena', 'Iznos', 'status']], hide_index=True)
-        st.metric("UKUPNO (RSD)", f"{df_k['Iznos'].sum():,.2f}")
-    else: st.write("Korpa je prazna.")
+        odabrani_dob = st.selectbox("Izaberite dobavljača:", dobavljaci_za_artikl['dobavljac'].unique())
+        tražena_kol = st.number_input("Količina:", min_value=1)
+        
+        if st.button("Potvrdi narudžbinu"):
+            red = st.session_state.df_dobavljaci[(st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & 
+                                                 (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)]
+            
+            if tražena_kol <= red.iloc[0]['kolicina']:
+                # 1. Dodaj u narudžbenicu
+                stavka = red.iloc[0].to_dict()
+                stavka['kolicina_tražena'] = tražena_kol
+                stavka['status'] = 'Čeka'
+                st.session_state.narudžbenica.append(stavka)
+                
+                # 2. Smanji zalihe u session_state bazi
+                idx = red.index[0]
+                st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
+                
+                st.success("Naručeno!")
+                st.rerun()
+            else:
+                st.error("Nedovoljno na stanju!")
 
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
