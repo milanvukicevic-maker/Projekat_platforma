@@ -25,6 +25,8 @@ if 'zahtjevi' not in st.session_state:
     st.session_state.zahtjevi = {}
 
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
+if 'narudžbenica' not in st.session_state:
+    st.session_state.narudžbenica = []
 st.title("KAIZA B2B Platforma")
 
 # Tabovi za uloge
@@ -41,12 +43,26 @@ with tab_kupac:
         lista = nadji_dobavljace_za_artikl(artikl_za_izbor)
         rezultati = filtriraj_dobavljace(lista, kolicina)
         
-        if rezultati:
-            df_rez = pd.DataFrame(rezultati)
+                if rezultati:
             st.table(df_rez)
+            # Dodajemo izbor dobavljača za narudžbinu
+            izabrani_dob = st.selectbox("Izaberite dobavljača za potvrdu:", [d['dobavljac'] for d in rezultati])
+            if st.button("Dodaj u narudžbinu"):
+                # Pronađi podatke o tom dobavljaču
+                stavka = next(d for d in rezultati if d['dobavljac'] == izabrani_dob)
+                stavka['artikl'] = artikl_za_izbor
+                stavka['kolicina_tražena'] = kolicina
+                st.session_state.narudžbenica.append(stavka)
+                st.success(f"Dodato: {artikl_za_izbor} od {izabrani_dob}")
         else:
-            st.warning("Nema dobavljača sa traženom količinom.")
-
+            st.warning("Nema dobavljača.")
+    st.divider()
+    st.subheader("Vaša narudžbenica")
+    if st.session_state.narudžbenica:
+        df_korpa = pd.DataFrame(st.session_state.narudžbenica)
+        st.dataframe(df_korpa, use_container_width=True)
+    else:
+        st.write("Korpa je prazna.")
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     st.write("Ovde će biti pregled pristiglih zahteva.")
