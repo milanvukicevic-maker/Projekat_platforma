@@ -63,10 +63,21 @@ with tab_kupac:
     st.divider()
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
+        # Kreiramo DataFrame iz korpe
         df_korpa = pd.DataFrame(st.session_state.narudžbenica)
-        st.dataframe(df_korpa, use_container_width=True)
+        
+        # Izračunaj iznos (količina * cena)
+        df_korpa['Iznos'] = df_korpa['kolicina_tražena'] * df_korpa['cena']
+        
+        # Prikaz tabele sa iznosima
+        st.dataframe(df_korpa[['artikl', 'dobavljac', 'kolicina_tražena', 'cena', 'Iznos']], use_container_width=True)
+        
+        # Prikaz ukupne vrednosti cele korpe
+        ukupno = df_korpa['Iznos'].sum()
+        st.metric("UKUPNO ZA PLAĆANJE (RSD)", f"{ukupno:,.2f}")
     else:
         st.write("Korpa je prazna.")
+        
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     
