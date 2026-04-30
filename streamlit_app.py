@@ -1,23 +1,34 @@
 import streamlit as st
 import pandas as pd
 
-# 1. Definisanje podataka (df_artikli, df_dobavljaci)
-# ... [vaš kod za DataFrame-ove] ...
+# 1. PRVO DEFINIŠITE PODATKE (katalog mora biti ovde)
+katalog = {
+    "Meso": {"Juneće meso": ["Ramstek", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Rozbif", "File", "Koljenica"],
+             "Svinjsko meso": ["Kare", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Trbušina", "Koljenica", "File"]},
+    "Povrće": {"Plodovito povrće": ["Paradajz", "Paprika", "Tikvice", "Patlidžan", "Krastavac", "Brokoli", "Karfiol"]}
+}
 
-# 2. INICIJALIZACIJA SESSION_STATE (Ovo je kritično)
+# 2. ZATIM KREIRAJTE DATAFRAME
+data_artikli = []
+for grupa, kategorije in katalog.items():
+    for kat, artikli in kategorije.items():
+        for art in artikli:
+            data_artikli.append({"Grupa": grupa, "Kategorija": kat, "Artikl": art})
+df_artikli = pd.DataFrame(data_artikli)
+
+svi_dobavljaci_lista = [
+    {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
+    {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
+]
+df_dobavljaci = pd.DataFrame(svi_dobavljaci_lista)
+
+# 3. ZATIM INICIJALIZUJTE SESSION_STATE
 if 'narudžbenica' not in st.session_state:
     st.session_state.narudžbenica = []
 
-if 'trazeni_rezultati' not in st.session_state:
-    st.session_state.trazeni_rezultati = []
-
-# 3. KONFIGURACIJA STRANICE
+# 4. TEK NA KRAJU KONFIGURIŠITE STRANICU
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
 st.title("KAIZA B2B Platforma")
-
-# Sada slobodno možete koristiti st.session_state.narudžbenica
-
-# ... ostatak vašeg koda gde koristite df_artikli i df_dobavljaci
 
 # Tabovi za uloge
 tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC (Hotel Moskva)", "🚛 DOBAVLJAČ (Meso-Prom)"])
