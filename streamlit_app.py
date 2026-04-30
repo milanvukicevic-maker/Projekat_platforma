@@ -122,13 +122,21 @@ with tab_dobavljac:
         izabrani_index = st.number_input("Redni broj zahteva (0-indexed):", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
         
         col1, col2 = st.columns(2)
-         # Unutar tab_dobavljac, kod tastera za potvrdu:
+        
         if col1.button("✅ Prihvati"):
             st.session_state.narudžbenica[izabrani_index]['status'] = 'Prihvaćeno'
-            st.toast("Narudžbina uspešno prihvaćena!", icon="✅") # Nova notifikacija
+            # Postavljamo poruku u session_state da je prikažemo nakon rerun-a
+            st.session_state.poruka = "Narudžbina uspešno prihvaćena!"
             st.rerun()
+            
         if col2.button("❌ Odbij"):
             st.session_state.narudžbenica[izabrani_index]['status'] = 'Odbijeno'
+            st.session_state.poruka = "Narudžbina je odbijena."
             st.rerun()
+
+    # Prikaži poruku ako postoji u session_state
+    if 'poruka' in st.session_state:
+        st.toast(st.session_state.poruka, icon="ℹ️")
+        del st.session_state.poruka # Obriši nakon prikaza        
     else:
         st.info("Nema pristiglih zahteva.")
