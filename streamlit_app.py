@@ -78,6 +78,14 @@ with tab_kupac:
         st.metric("UKUPNO ZA PLAĆANJE (RSD)", f"{ukupno:,.2f}")
     else:
         st.write("Korpa je prazna.")
+    st.divider()
+    st.subheader("Statusi vaših zahteva")
+    if st.session_state.narudžbenica:
+        # Prikazujemo samo osnovne info i status
+        df_status = pd.DataFrame(st.session_state.narudžbenica)
+        st.dataframe(df_status[['artikl', 'status']], use_container_width=True, hide_index=True)
+    else:
+        st.write("Nema aktivnih zahteva.")
         
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
