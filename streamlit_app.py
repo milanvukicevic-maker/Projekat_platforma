@@ -18,7 +18,7 @@ df_artikli = pd.DataFrame(data_artikli)
 if 'df_dobavljaci' not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-        {"dobavljac": "Meat-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 100, "cena": 120, "poeni": 90}
+        {"dobavljac": "Meat-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 100, "cena": 1900, "poeni": 90}
     ])
 
 # 2. INICIJALIZACIJA
