@@ -9,7 +9,7 @@ if 'df_dobavljaci' not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
         {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
-        {"dobavljac": "Firma X", "artikl": "Ramstek", "kolicina": 100, "cena": 1600, "poeni": 80}
+        {"dobavljac": "Firma X", "artikl": "But", "kolicina": 100, "cena": 1600, "poeni": 80}
     ])
 
 if 'narudžbenica' not in st.session_state:
