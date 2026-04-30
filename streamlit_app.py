@@ -21,14 +21,19 @@ tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
 with tab_kupac:
     st.header("Upravljačka tabla — KUPAC")
-    odabrani_kupac = st.selectbox("Firma:", df_kupci['Naziv_Firme'].unique())
-    artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(df_artikli['Artikl'].unique()))
+    # 1. Kupac: Dodajemo praznu opciju na početak, da ne bira odmah Moskvu
+    odabrani_kupac = st.selectbox("Izaberite vašu firmu:", [""] + list(df_kupci['Naziv_Firme'].unique()))
     
-    if artikl_za_izbor:
-        dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
+    if odabrani_kupac:
+        artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(df_artikli['Artikl'].unique()))
         
-        if not dostupni.empty:
-            st.dataframe(dostupni, hide_index=True)
+        if artikl_za_izbor:
+            # UVEK čitamo iz session_state, ne iz originalnog DataFrame-a
+            dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
+            
+            if not dostupni.empty:
+                # Prikazujemo SVE dobavljače koji imaju taj artikl
+                st.dataframe(dostupni, hide_index=True)            st.dataframe(dostupni, hide_index=True)
             odabrani_dob = st.selectbox("Dobavljač:", dostupni['dobavljac'].unique())
             tražena_kol = st.number_input("Količina (kg):", min_value=1)
             
