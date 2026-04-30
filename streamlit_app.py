@@ -27,12 +27,17 @@ with tab_kupac:
     
     if odabrani_kupac:
         artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(df_artikli['Artikl'].unique()))
-        
         if artikl_za_izbor:
-            # Filtriramo dobavljače za izabrani artikl
-            dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
+            # FORSIRANO čitanje direktno iz CSV-a radi testa (preskačemo session_state)
+            # Ovo će nam reći da li problem u session_state-u ili u samom CSV-u
+            df_test = pd.read_csv("dobavljaci.csv")
+            dostupni = df_test[df_test['artikl'] == artikl_za_izbor]
             
+            # Ako ovde vidite sve, problem je u session_state
             if not dostupni.empty:
+                st.write("Broj pronađenih dobavljača:", len(dostupni))
+                st.dataframe(dostupni, hide_index=True)
+
                 # Prikazujemo tabelu sa trenutnim stanjem
                 st.dataframe(dostupni, hide_index=True)
                 
