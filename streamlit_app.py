@@ -1,15 +1,16 @@
 import streamlit as st
 import pandas as pd
+import time
 
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
 st.title("KAIZA B2B Platforma")
 
-# 1. INICIJALIZACIJA BAZE
+# 1. INICIJALIZACIJA PODATAKA
 if 'df_dobavljaci' not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
         {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
-        {"dobavljac": "Firma X", "artikl": "But", "kolicina": 100, "cena": 1600, "poeni": 80}
+        {"dobavljac": "Firma X", "artikl": "Ramstek", "kolicina": 100, "cena": 1600, "poeni": 80}
     ])
 
 if 'narudžbenica' not in st.session_state:
@@ -21,43 +22,36 @@ tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 with tab_kupac:
     st.header("Upravljačka tabla — KUPAC")
     
-    # Izbor artikla
     artikli = st.session_state.df_dobavljaci['artikl'].unique()
     artikl_za_izbor = st.selectbox("Izaberite artikl:", [""] + list(artikli))
     
     if artikl_za_izbor:
-        # Prikaz svih dobavljača za taj artikl
         dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
         
         if not dostupni.empty:
             st.dataframe(dostupni, hide_index=True)
-            
-            # Izbor dobavljača direktno iz filtrirane liste
             odabrani_dob = st.selectbox("Izaberite dobavljača:", dostupni['dobavljac'].unique())
             tražena_kol = st.number_input("Količina (kg):", min_value=1)
             
             if st.button("Naruči"):
-                # ISPRAVNA PRETRAGA: Tražimo red baš po tom imenu dobavljača i artiklu
                 mask = (st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & \
                        (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)
+                idx = st.session_state.df_dobavljaci[mask].index[0]
                 
-                if mask.any():
-                    idx = st.session_state.df_dobavljaci[mask].index[0]
-                    
-                    if tražena_kol <= st.session_state.df_dobavljaci.at[idx, 'kolicina']:
-                        # Kreiramo stavku
-                        stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
-                        stavka.update({'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
-                        
-                        st.session_state.narudžbenica.append(stavka)
-                        st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
-                        
-                        st.success(f"Naručeno {tražena_kol}kg od {odabrani_dob}!")
-                        st.rerun()
-                    else:
-                        st.error("Nedovoljno na stanju!")
-        else:
-            st.warning("Nema dobavljača.")
+                if tražena_kol <= st.session_state.df_dobavljaci.at[idx, 'kolicina']:
+                    # STVARAMO STAVKU SA JEDINSTVENIM ID-JEM
+                    stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
+                    stavka.update({
+                        'id': f"{int(time.time())}_{odabrani_dob}",
+                        'kolicina_tražena': tražena_kol, 
+                        'status': 'Čeka'
+                    })
+                    st.session_state.narudžbenica.append(stavka)
+                    st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
+                    st.success(f"Naručeno {tražena_kol}kg!")
+                    st.rerun()
+                else:
+                    st.error("Nedovoljno na stanju!")
 
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
@@ -67,31 +61,18 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     if st.session_state.narudžbenica:
-        df_z = pd.DataFrame(st.session_state.narudžbenica)
-        st.dataframe(df_z[['artikl', 'kolicina_tražena', 'status']], hide_index=True)
-        
-        idx = st.number_input("Redni broj zahteva:", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
-        if st.button("✅ Prihvati"):
-            st.session_state.narudžbenica[idx]['status'] = 'Prihvaćeno'
-            st.rerun()
-        if st.button("❌ Odbij"):
-            st.session_state.narudžbenica[idx]['status'] = 'Odbijeno'
-            st.rerun()
-    else:
-        st.info("Nema pristiglih zahteva.")
-with tab_dobavljac:
-    st.header("Upravljačka tabla — DOBAVLJAČ")
-    if st.session_state.narudžbenica:
-        # Prikaz sa ID-jem
+        # Prikaz stavki sa nezavisnim dugmadima
         for i, stavka in enumerate(st.session_state.narudžbenica):
-            cols = st.columns([1, 3, 1, 2])
-            cols[0].write(f"#{i}")
-            cols[1].write(f"{stavka['artikl']} ({stavka['kolicina_tražena']}kg)")
-            cols[2].write(f"{stavka['status']}")
+            cols = st.columns([2, 1, 1, 1])
+            cols[0].write(f"{stavka['artikl']} ({stavka['kolicina_tražena']}kg) od {stavka['dobavljac']}")
+            cols[1].write(f"Status: {stavka['status']}")
             
-            # Dugmad za svaku stavku posebno
-            if cols[3].button("✅", key=f"prihvati_{i}"):
+            # KORISTIMO ID ZA KLJUČ DA DUGME BUDE NEZAVISNO
+            if cols[2].button("✅", key=f"p_{stavka['id']}"):
                 st.session_state.narudžbenica[i]['status'] = 'Prihvaćeno'
+                st.rerun()
+            if cols[3].button("❌", key=f"o_{stavka['id']}"):
+                st.session_state.narudžbenica[i]['status'] = 'Odbijeno'
                 st.rerun()
     else:
         st.info("Nema pristiglih zahteva.")
