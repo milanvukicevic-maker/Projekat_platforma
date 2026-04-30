@@ -83,19 +83,22 @@ with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     
     if st.session_state.narudžbenica:
-        # Prikaz zahteva za dobavljača
+        # Kreiramo DataFrame iz korpe za pregled dobavljača
         df_zahtevi = pd.DataFrame(st.session_state.narudžbenica)
-        st.dataframe(df_zahtevi, use_container_width=True)
+        df_zahtevi['Iznos'] = df_zahtevi['kolicina_tražena'] * df_zahtevi['cena']
         
-        # Akcije
-        izabrani_zahtev_index = st.number_input("Izaberite redni broj zahteva za odgovor:", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
+        # Prikaz tabele sa iznosima
+        st.dataframe(df_zahtevi[['artikl', 'kolicina_tražena', 'cena', 'Iznos', 'status']], use_container_width=True, hide_index=True)
+        
+        # Izbor zahteva za promenu statusa
+        izabrani_index = st.number_input("Redni broj zahteva (0-indexed):", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
         
         col1, col2 = st.columns(2)
-        if col1.button("✅ Prihvati zahtev"):
-            st.session_state.narudžbenica[izabrani_zahtev_index]['status'] = 'Prihvaćeno'
+        if col1.button("✅ Prihvati"):
+            st.session_state.narudžbenica[izabrani_index]['status'] = 'Prihvaćeno'
             st.rerun()
-        if col2.button("❌ Odbij zahtev"):
-            st.session_state.narudžbenica[izabrani_zahtev_index]['status'] = 'Odbijeno'
+        if col2.button("❌ Odbij"):
+            st.session_state.narudžbenica[izabrani_index]['status'] = 'Odbijeno'
             st.rerun()
     else:
         st.info("Nema pristiglih zahteva.")
