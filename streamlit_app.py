@@ -83,12 +83,17 @@ with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
     
     if st.session_state.narudžbenica:
-        # Kreiramo DataFrame iz korpe za pregled dobavljača
+        # SIGURNOSNI KOD: Dodaje 'status' ako nedostaje
+        for s in st.session_state.narudžbenica:
+            if 'status' not in s:
+                s['status'] = 'Čeka'
+        
         df_zahtevi = pd.DataFrame(st.session_state.narudžbenica)
         df_zahtevi['Iznos'] = df_zahtevi['kolicina_tražena'] * df_zahtevi['cena']
         
-        # Prikaz tabele sa iznosima
+        # Prikaz tabele
         st.dataframe(df_zahtevi[['artikl', 'kolicina_tražena', 'cena', 'Iznos', 'status']], use_container_width=True, hide_index=True)
+        # ... (ostatak koda)
         
         # Izbor zahteva za promenu statusa
         izabrani_index = st.number_input("Redni broj zahteva (0-indexed):", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
