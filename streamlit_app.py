@@ -1,32 +1,39 @@
 import streamlit as st
 import pandas as pd
 
-# Podaci
+# Podaci (preuzeti iz vašeg originalnog koda)
+katalog = {
+    "Meso": {"Juneće meso": ["Ramstek", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Rozbif", "File", "Koljenica"],
+             "Svinjsko meso": ["Kare", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Trbušina", "Koljenica", "File"]},
+    "Povrće": {"Plodovito povrće": ["Paradajz", "Paprika", "Tikvice", "Patlidžan", "Krastavac", "Brokoli", "Karfiol"]}
+}
+
 svi_dobavljaci = [
     {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-    {"dobavljac": "Agro-Klanica Petrović", "artikl": "Ramstek", "kolicina": 120, "cena": 1780, "poeni": 87},
-    {"dobavljac": "Premium Meat Co.", "artikl": "Ramstek", "kolicina": 200, "cena": 1950, "poeni": 94},
-    {"dobavljac": "Meso-Prom d.o.o.", "artikl": "But", "kolicina": 300, "cena": 1200, "poeni": 91},
-    {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90},
-    {"dobavljac": "Mlekara Zlatibor", "artikl": "Beli sir", "kolicina": 500, "cena": 680, "poeni": 92},
-    {"dobavljac": "Farma Nikolić", "artikl": "Pileći file", "kolicina": 300, "cena": 650, "poeni": 89}
+    {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
 ]
 
-st.set_page_config(layout="wide")
-st.title("LOBO B2B Platforma - Prototip")
+# Inicijalizacija memorije aplikacije
+if 'zahtjevi' not in st.session_state:
+    st.session_state.zahtjevi = {}
 
-st.subheader("Trenutni katalog dobavljača")
-df_dobavljaci = pd.DataFrame(svi_dobavljaci)
-st.dataframe(df_dobavljaci, use_container_width=True)
+st.set_page_config(page_title="KAIZA B2B", layout="wide")
+st.title("KAIZA B2B Platforma")
 
-st.subheader("Pretraga artikala")
-artikl_input = st.selectbox("Izaberite artikl:", df_dobavljaci['artikl'].unique())
-kolicina_input = st.number_input("Količina:", min_value=1, value=10)
+# Tabovi za uloge
+tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC (Hotel Moskva)", "🚛 DOBAVLJAČ (Meso-Prom)"])
 
-if st.button("Pronađi dobavljače"):
-    rezultat = [d for d in svi_dobavljaci if d["artikl"] == artikl_input and d["kolicina"] >= kolicina_input]
-    if rezultat:
-        st.success(f"Pronađeno {len(rezultat)} dobavljača!")
-        st.table(pd.DataFrame(rezultat))
-    else:
-        st.error("Nema dostupnih dobavljača za ovu količinu.")
+with tab_kupac:
+    st.header("Upravljačka tabla — KUPAC")
+    artikl_za_izbor = st.selectbox("Izaberite artikl:", ["Ramstek", "Paradajz"])
+    kolicina = st.number_input("Količina:", min_value=1, value=10)
+    
+    if st.button("Pronađi dobavljače"):
+        st.write(f"Tražim dobavljače za: {artikl_za_izbor}")
+        # Ovde ćemo kasnije dodati funkciju filtriranja
+
+with tab_dobavljac:
+    st.header("Upravljačka tabla — DOBAVLJAČ")
+    st.write("Ovde će biti pregled pristiglih zahteva.")
+    if st.button("Osveži zahtjeve"):
+        st.write("Učitavam...")
