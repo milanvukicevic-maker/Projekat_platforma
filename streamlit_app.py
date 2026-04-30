@@ -40,23 +40,25 @@ with tab_kupac:
     kolicina = st.number_input("Količina:", min_value=1, value=10)
     
     if st.button("Pronađi dobavljače"):
-        lista = nadji_dobavljace_za_artikl(artikl_za_izbor)
-        rezultati = filtriraj_dobavljace(lista, kolicina)
+        st.session_state.trazeni_rezultati = filtriraj_dobavljace(nadji_dobavljace_za_artikl(artikl_za_izbor), kolicina)
+        st.session_state.artikl_trenutni = artikl_za_izbor
+        st.session_state.kolicina_trenutna = kolicina
+
+    # Prikaz rezultata ako postoje u memoriji
+    if 'trazeni_rezultati' in st.session_state and st.session_state.trazeni_rezultati:
+        df_rez = pd.DataFrame(st.session_state.trazeni_rezultati)
+        st.table(df_rez)
         
-        if rezultati:
-            df_rez = pd.DataFrame(rezultati)
-            st.table(df_rez)
-            # Dodajemo izbor dobavljača za narudžbinu
-            izabrani_dob = st.selectbox("Izaberite dobavljača za potvrdu:", [d['dobavljac'] for d in rezultati])
-            if st.button("Dodaj u narudžbinu"):
-                # Pronađi podatke o tom dobavljaču
-                stavka = next(d for d in rezultati if d['dobavljac'] == izabrani_dob).copy()
-                stavka['artikl'] = artikl_za_izbor
-                stavka['kolicina_tražena'] = kolicina
-                st.session_state.narudžbenica.append(stavka)
-                st.success(f"Dodato: {artikl_za_izbor} od {izabrani_dob}")
-        else:
-            st.warning("Nema dobavljača.")
+        izabrani_dob = st.selectbox("Izaberite dobavljača za potvrdu:", [d['dobavljac'] for d in st.session_state.trazeni_rezultati])
+        
+        if st.button("Dodaj u narudžbinu"):
+            stavka = next(d for d in st.session_state.trazeni_rezultati if d['dobavljac'] == izabrani_dob).copy()
+            stavka['artikl'] = st.session_state.artikl_trenutni
+            stavka['kolicina_tražena'] = st.session_state.kolicina_trenutna
+            st.session_state.narudžbenica.append(stavka)
+            st.success(f"Dodato: {stavka['artikl']} od {izabrani_dob}")
+    elif 'trazeni_rezultati' in st.session_state:
+        st.warning("Nema dobavljača.")
             
     st.divider()
     st.subheader("Vaša narudžbenica")
