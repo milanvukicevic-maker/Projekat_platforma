@@ -21,7 +21,14 @@ svi_dobavljaci_lista = [
     {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
 ]
 df_dobavljaci = pd.DataFrame(svi_dobavljaci_lista)
+# 2. DEFINICIJA FUNKCIJA (Nakon DataFrame-ova)
+def nadji_dobavljace(artikl):
+    return df_dobavljaci[df_dobavljaci['artikl'] == artikl]
 
+def filtriraj_dobavljace(df, trazena):
+    # Filtrira DataFrame koji smo već dobili iz 'nadji_dobavljace'
+    kval = df[df['kolicina'] >= trazena]
+    return kval.sort_values(by='poeni', ascending=False)
 # 3. ZATIM INICIJALIZUJTE SESSION_STATE
 if 'narudžbenica' not in st.session_state:
     st.session_state.narudžbenica = []
@@ -41,7 +48,9 @@ with tab_kupac:
     kolicina = st.number_input("Količina:", min_value=1, value=10)
     
     if st.button("Pronađi dobavljače"):
-        st.session_state.trazeni_rezultati = filtriraj_dobavljace(nadji_dobavljace_za_artikl(artikl_za_izbor), kolicina)
+        # Pozivamo nove funkcije:
+        rezultati_df = nadji_dobavljace(artikl_za_izbor)
+        st.session_state.trazeni_rezultati = filtriraj_dobavljace(rezultati_df, kolicina).to_dict('records')
         st.session_state.artikl_trenutni = artikl_za_izbor
         st.session_state.kolicina_trenutna = kolicina
 
