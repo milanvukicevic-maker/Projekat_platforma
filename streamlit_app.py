@@ -43,19 +43,21 @@ with tab_kupac:
         lista = nadji_dobavljace_za_artikl(artikl_za_izbor)
         rezultati = filtriraj_dobavljace(lista, kolicina)
         
-                if rezultati:
+        if rezultati:
+            df_rez = pd.DataFrame(rezultati)
             st.table(df_rez)
             # Dodajemo izbor dobavljača za narudžbinu
             izabrani_dob = st.selectbox("Izaberite dobavljača za potvrdu:", [d['dobavljac'] for d in rezultati])
             if st.button("Dodaj u narudžbinu"):
                 # Pronađi podatke o tom dobavljaču
-                stavka = next(d for d in rezultati if d['dobavljac'] == izabrani_dob)
+                stavka = next(d for d in rezultati if d['dobavljac'] == izabrani_dob).copy()
                 stavka['artikl'] = artikl_za_izbor
                 stavka['kolicina_tražena'] = kolicina
                 st.session_state.narudžbenica.append(stavka)
                 st.success(f"Dodato: {artikl_za_izbor} od {izabrani_dob}")
         else:
             st.warning("Nema dobavljača.")
+            
     st.divider()
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
