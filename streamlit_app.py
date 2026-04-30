@@ -69,6 +69,21 @@ with tab_kupac:
         st.write("Korpa je prazna.")
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
-    st.write("Ovde će biti pregled pristiglih zahteva.")
-    if st.button("Osveži zahtjeve"):
-        st.write("Učitavam...")
+    
+    if st.session_state.narudžbenica:
+        # Prikaz zahteva za dobavljača
+        df_zahtevi = pd.DataFrame(st.session_state.narudžbenica)
+        st.dataframe(df_zahtevi, use_container_width=True)
+        
+        # Akcije
+        izabrani_zahtev_index = st.number_input("Izaberite redni broj zahteva za odgovor:", min_value=0, max_value=len(st.session_state.narudžbenica)-1)
+        
+        col1, col2 = st.columns(2)
+        if col1.button("✅ Prihvati zahtev"):
+            st.session_state.narudžbenica[izabrani_zahtev_index]['status'] = 'Prihvaćeno'
+            st.rerun()
+        if col2.button("❌ Odbij zahtev"):
+            st.session_state.narudžbenica[izabrani_zahtev_index]['status'] = 'Odbijeno'
+            st.rerun()
+    else:
+        st.info("Nema pristiglih zahteva.")
