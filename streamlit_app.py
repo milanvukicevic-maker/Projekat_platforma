@@ -1,37 +1,28 @@
 import streamlit as st
 import pandas as pd
 
-# 1. PODACI
-katalog = {
-    "Meso": {"Juneće meso": ["Ramstek", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Rozbif", "File", "Koljenica"],
-             "Svinjsko meso": ["Kare", "But", "Plećka", "Rebra", "Vrat", "Lungić", "Trbušina", "Koljenica", "File"]},
-    "Povrće": {"Plodovito povrće": ["Paradajz", "Paprika", "Tikvice", "Patlidžan", "Krastavac", "Brokoli", "Karfiol"]}
-}
+# 1. DINAMIČKO UČITAVANJE (Nema više hardkodiranih podataka)
+@st.cache_data
+def ucitaj_podatke():
+    df_art = pd.read_csv("artikli.csv")
+    df_dob = pd.read_csv("dobavljaci.csv")
+    return df_art, df_dob
 
-data_artikli = []
-for grupa, kategorije in katalog.items():
-    for kat, artikli in kategorije.items():
-        for art in artikli:
-            data_artikli.append({"Grupa": grupa, "Kategorija": kat, "Artikl": art})
-df_artikli = pd.DataFrame(data_artikli)
+df_artikli, df_dobavljaci_baza = ucitaj_podatke()
 
+# Inicijalizacija baze u session_state radi promene stanja
 if 'df_dobavljaci' not in st.session_state:
-    st.session_state.df_dobavljaci = pd.DataFrame([
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-        {"dobavljac": "Meat-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 100, "cena": 1900, "poeni": 90}
-    ])
+    st.session_state.df_dobavljaci = df_dobavljaci_baza
 
-# 2. INICIJALIZACIJA
 if 'narudžbenica' not in st.session_state: st.session_state.narudžbenica = []
 
-# 3. KONFIGURACIJA
+# 2. KONFIGURACIJA
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
 st.title("KAIZA B2B Platforma")
 
-tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC (Hotel Moskva)", "🚛 DOBAVLJAČ (Meso-Prom)"])
+tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
 with tab_kupac:
-    st.header("Upravljačka tabla — KUPAC")
     artikl_za_izbor = st.selectbox("Izaberite artikl:", df_artikli['Artikl'].unique())
     
     dostupni = st.session_state.df_dobavljaci[st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor]
@@ -41,20 +32,22 @@ with tab_kupac:
         odabrani_dob = st.selectbox("Izaberite dobavljača:", dostupni['dobavljac'].unique())
         tražena_kol = st.number_input("Količina:", min_value=1)
         
-        if st.button("Dodaj u narudžbinu"):
+        if st.button("Potvrdi narudžbinu"):
             red = st.session_state.df_dobavljaci[(st.session_state.df_dobavljaci['dobavljac'] == odabrani_dob) & 
                                                  (st.session_state.df_dobavljaci['artikl'] == artikl_za_izbor)]
             if tražena_kol <= red.iloc[0]['kolicina']:
                 stavka = red.iloc[0].to_dict()
                 stavka.update({'kolicina_tražena': tražena_kol, 'status': 'Čeka'})
                 st.session_state.narudžbenica.append(stavka)
-                # Smanjenje zaliha
+                # Ažuriranje zaliha u session_state
                 idx = red.index[0]
                 st.session_state.df_dobavljaci.at[idx, 'kolicina'] -= tražena_kol
-                st.success("Dodato!")
+                st.success("Naručeno!")
                 st.rerun()
-            else: st.error("Nema dovoljno na stanju!")
-    else: st.warning("Nema dobavljača.")
+            else: st.error("Nedovoljno na stanju!")
+    else: st.warning("Nema dobavljača za ovaj artikl.")
+
+# ... (ostatak koda za tab_dobavljac ostaje isti kao u prethodnoj verziji)
 
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
