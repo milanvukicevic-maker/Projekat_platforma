@@ -81,8 +81,13 @@ with tab_kupac:
     st.divider()
     st.subheader("Statusi vaših zahteva")
     if st.session_state.narudžbenica:
-        # Prikazujemo samo osnovne info i status
+        # Sigurno učitavanje: dodaj 'status' ako fali u bilo kojoj stavci
+        for s in st.session_state.narudžbenica:
+            if 'status' not in s:
+                s['status'] = 'Čeka'
+        
         df_status = pd.DataFrame(st.session_state.narudžbenica)
+        # Prikazujemo samo dostupne kolone
         st.dataframe(df_status[['artikl', 'status']], use_container_width=True, hide_index=True)
     else:
         st.write("Nema aktivnih zahteva.")
