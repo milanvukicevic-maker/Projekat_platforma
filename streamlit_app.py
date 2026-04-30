@@ -79,3 +79,19 @@ with tab_dobavljac:
             st.rerun()
     else:
         st.info("Nema pristiglih zahteva.")
+with tab_dobavljac:
+    st.header("Upravljačka tabla — DOBAVLJAČ")
+    if st.session_state.narudžbenica:
+        # Prikaz sa ID-jem
+        for i, stavka in enumerate(st.session_state.narudžbenica):
+            cols = st.columns([1, 3, 1, 2])
+            cols[0].write(f"#{i}")
+            cols[1].write(f"{stavka['artikl']} ({stavka['kolicina_tražena']}kg)")
+            cols[2].write(f"{stavka['status']}")
+            
+            # Dugmad za svaku stavku posebno
+            if cols[3].button("✅", key=f"prihvati_{i}"):
+                st.session_state.narudžbenica[i]['status'] = 'Prihvaćeno'
+                st.rerun()
+    else:
+        st.info("Nema pristiglih zahteva.")
