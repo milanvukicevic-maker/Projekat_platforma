@@ -13,13 +13,11 @@ svi_dobavljaci = [
     {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Paradajz", "kolicina": 500, "cena": 120, "poeni": 90}
 ]
 # Funkcije za logiku (prenesene iz vašeg koda)
-def nadji_dobavljace_za_artikl(artikl):
-    return [d for d in svi_dobavljaci if d["artikl"] == artikl]
-
-def filtriraj_dobavljace(lista, trazena):
-    kval = [d for d in lista if d["kolicina"] >= trazena]
-    return sorted(kval, key=lambda x: x["poeni"], reverse=True)
-
+def nadji_dobavljace(artikl):
+    return df_dobavljaci[df_dobavljaci['artikl'] == artikl]
+def filtriraj_dobavljace(df, trazena):
+    kval = df[df['kolicina'] >= trazena]
+    return kval.sort_values(by='poeni', ascending=False)
 # Inicijalizacija memorije aplikacije
 if 'zahtjevi' not in st.session_state:
     st.session_state.zahtjevi = {}
@@ -36,7 +34,7 @@ with tab_kupac:
     st.header("Upravljačka tabla — KUPAC")
     # Dinamički spisak iz vašeg kataloga
     svi_artikli = [a for sub in [cat.values() for cat in katalog.values()] for sublist in sub for a in sublist]
-    artikl_za_izbor = st.selectbox("Izaberite artikl:", svi_artikli)
+    artikl_za_izbor = st.selectbox("Izaberite artikl:", df_artikli['Artikl'].unique())
     kolicina = st.number_input("Količina:", min_value=1, value=10)
     
     if st.button("Pronađi dobavljače"):
