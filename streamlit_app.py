@@ -63,16 +63,17 @@ with tab_kupac:
     st.divider()
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudžbenica:
-        # Kreiramo DataFrame iz korpe
         df_korpa = pd.DataFrame(st.session_state.narudžbenica)
         
-        # Izračunaj iznos (količina * cena)
+        # Izračunaj iznos
         df_korpa['Iznos'] = df_korpa['kolicina_tražena'] * df_korpa['cena']
         
-        # Prikaz tabele sa iznosima
-        st.dataframe(df_korpa[['artikl', 'dobavljac', 'kolicina_tražena', 'cena', 'Iznos']], use_container_width=True)
+        # Ovde biramo samo kolone koje želimo da vidimo, bez indeksa
+        prikaz = df_korpa[['artikl', 'dobavljac', 'kolicina_tražena', 'cena', 'Iznos']]
         
-        # Prikaz ukupne vrednosti cele korpe
+        # Prikaz bez indeksa (index=False)
+        st.dataframe(prikaz, use_container_width=True, hide_index=True)
+        
         ukupno = df_korpa['Iznos'].sum()
         st.metric("UKUPNO ZA PLAĆANJE (RSD)", f"{ukupno:,.2f}")
     else:
