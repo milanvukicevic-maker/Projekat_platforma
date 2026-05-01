@@ -145,14 +145,18 @@ with tab_dobavljac:
             )
 
             if c2.button("✅", key=f"ok_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] not in ["Prihvaćeno", "Odbijeno"]:
-                    st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
+                if st.session_state.narudzbenica[i]["status"] == "Čeka":
                     orig_idx = st.session_state.narudzbenica[i]["_orig_idx"]
-                    st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] -= st.session_state.narudzbenica[i]["kolicina_tražena"]
+                    kolicina_za_smanjenje = st.session_state.narudzbenica[i]["kolicina_tražena"]
+
+                    trenutno = st.session_state.df_dobavljaci.at[orig_idx, "kolicina"]
+                    st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
+                    st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
+
                 st.rerun()
 
             if c3.button("❌", key=f"no_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] not in ["Prihvaćeno", "Odbijeno"]:
+                if st.session_state.narudzbenica[i]["status"] == "Čeka":
                     st.session_state.narudzbenica[i]["status"] = "Odbijeno"
                 st.rerun()
     else:
