@@ -25,65 +25,58 @@ tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 with tab_kupac:
     st.header("Upravljačka tabla — KUPAC")
 
-    odabrani_kupac = st.selectbox(
+    if "kupac_sel" not in st.session_state:
+        st.session_state.kupac_sel = ""
+    if "artikl_sel" not in st.session_state:
+        st.session_state.artikl_sel = ""
+    if "dobavljac_sel" not in st.session_state:
+        st.session_state.dobavljac_sel = ""
+
+    st.session_state.kupac_sel = st.selectbox(
         "Firma:",
-        [""] + list(df_kupci["Naziv_Firme"].unique()),
-        key="kupac_select"
+        [""] + df_kupci["Naziv_Firme"].tolist(),
+        key="kupac_widget"
     )
 
-    artikl_za_izbor = st.selectbox(
+    st.session_state.artikl_sel = st.selectbox(
         "Artikl:",
-        [""] + list(df_artikli["Artikl"].unique()),
-        key="artikl_select"
+        [""] + df_artikli["Artikl"].tolist(),
+        key="artikl_widget"
     )
 
-    if odabrani_kupac and artikl_za_izbor:
+    if st.session_state.kupac_sel and st.session_state.artikl_sel:
         dostupni = st.session_state.df_dobavljaci[
-            st.session_state.df_dobavljaci["artikl"] == artikl_za_izbor
+            st.session_state.df_dobavljaci["artikl"] == st.session_state.artikl_sel
         ].copy()
 
-        if not dostupni.empty:
+        if dostupni.empty:
+            st.info("Nema dobavljača za izabrani artikl.")
+        else:
             dostupni = dostupni.reset_index().rename(columns={"index": "_orig_idx"})
 
-            prikaz = dostupni[[
-                "dobavljac",
-                "artikl",
-                "kolicina",
-                "cena",
-                "_orig_idx"
-            ]].copy()
-
-            prikaz.columns = [
-                "Dobavljač",
-                "Artikl",
-                "Raspoloživa količina",
-                "Cena",
-                "_orig_idx"
-            ]
-
             st.dataframe(
-                prikaz[["Dobavljač", "Artikl", "Raspoloživa količina", "Cena"]],
+                dostupni[["dobavljac", "artikl", "kolicina", "cena"]],
                 hide_index=True,
                 use_container_width=True
             )
 
-            odabrani_dob = st.selectbox(
+            st.session_state.dobavljac_sel = st.selectbox(
                 "Dobavljač:",
-                dostupni["dobavljac"].unique(),
-                key="dobavljac_select"
+                dostupni["dobavljac"].tolist(),
+                key="dobavljac_widget"
             )
 
             tražena_kol = st.number_input(
                 "Količina (kg):",
                 min_value=1,
                 step=1,
-                key="kolicina_select"
+                key="kolicina_widget"
             )
 
             if st.button("Naruči", key="naruči_btn"):
                 mask = (
-                    (st.session_state.df_dobavljaci["dobavljac"] == odabrani_dob) &
-                    (st.session_state.df_dobavljaci["artikl"] == artikl_za_izbor)
+                    (st.session_state.df_dobavljaci["dobavljac"] == st.session_state.dobavljac_sel) &
+                    (st.session_state.df_dobavljaci["artikl"] == st.session_state.artikl_sel)
                 )
 
                 if not mask.any():
@@ -96,21 +89,21 @@ with tab_kupac:
                         stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
                         stavka.update({
                             "id": f"{int(time.time())}_{idx}",
-                            "kupac": odabrani_kupac,
+                            "kupac": st.session_state.kupac_sel,
                             "kolicina_tražena": tražena_kol,
                             "status": "Čeka",
                             "_orig_idx": idx
                         })
 
-                        st.session_state.narudžbenica.append(stavka)
+                        st.session_state.narudzbenica.append(stavka)
                         st.success("Narudžbina dodata.")
                         st.rerun()
                     else:
                         st.error("Nedovoljno na stanju!")
-        
+
     st.subheader("Vaša narudžbenica")
-    if st.session_state.narudžbenica:
-        df_k = pd.DataFrame(st.session_state.narudžbenica)
+    if st.session_state.narudzbenica:
+        df_k = pd.DataFrame(st.session_state.narudzbenica)
         prikaz_kupac = df_k[["kupac", "artikl", "kolicina_tražena", "status"]].copy()
         prikaz_kupac.columns = ["Kupac", "Artikl", "Količina", "Status"]
         st.dataframe(prikaz_kupac, hide_index=True, use_container_width=True)
@@ -144,6 +137,7 @@ with tab_dobavljac:
         st.subheader("Akcije po narudžbini")
         for i, stavka in enumerate(st.session_state.narudzbenica):
             c1, c2, c3 = st.columns([5, 1, 1])
+
             c1.write(
                 f"{stavka['kupac']} | {stavka['artikl']} | "
                 f"{stavka['kolicina_tražena']} | {stavka['kolicina']} | "
@@ -151,16 +145,15 @@ with tab_dobavljac:
             )
 
             if c2.button("✅", key=f"ok_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] != "Prihvaćeno":
+                if st.session_state.narudzbenica[i]["status"] not in ["Prihvaćeno", "Odbijeno"]:
                     st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
-
                     orig_idx = st.session_state.narudzbenica[i]["_orig_idx"]
                     st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] -= st.session_state.narudzbenica[i]["kolicina_tražena"]
-
                 st.rerun()
 
             if c3.button("❌", key=f"no_{stavka['id']}"):
-                st.session_state.narudzbenica[i]["status"] = "Odbijeno"
+                if st.session_state.narudzbenica[i]["status"] not in ["Prihvaćeno", "Odbijeno"]:
+                    st.session_state.narudzbenica[i]["status"] = "Odbijeno"
                 st.rerun()
     else:
         st.info("Nema zahteva.")
