@@ -107,7 +107,6 @@ with tab_kupac:
         st.dataframe(prikaz_kupac, hide_index=True, use_container_width=True)
     else:
         st.info("Nema narudžbina.")
-
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
