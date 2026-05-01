@@ -5,21 +5,19 @@ import time
 st.set_page_config(page_title="KAIZA B2B", layout="wide")
 st.title("KAIZA B2B Platforma")
 
-# 1. BAZE (Artikli, Kupci, Dobavljači)
-if 'df_dobavljaci' not in st.session_state:
+if "df_dobavljaci" not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
         {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "But", "kolicina": 200, "cena": 1400, "poeni": 85}
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "But", "kolicina": 200, "cena": 1400, "poeni": 85},
     ])
+
+if "narudzbenica" not in st.session_state:
+    st.session_state.narudzbenica = []
 
 df_artikli = pd.DataFrame({"Artikl": ["Ramstek", "But", "Paradajz"]})
 df_kupci = pd.DataFrame({"Naziv_Firme": ["Hotel Moskva", "Restoran Dunav"]})
 
-if 'narudžbenica' not in st.session_state:
-    st.session_state.narudžbenica = []
-
-# 2. INTERFEJS
 tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
 with tab_kupac:
@@ -107,6 +105,8 @@ with tab_kupac:
         prikaz_kupac = df_k[["kupac", "artikl", "kolicina_tražena", "status"]].copy()
         prikaz_kupac.columns = ["Kupac", "Artikl", "Količina", "Status"]
         st.dataframe(prikaz_kupac, hide_index=True, use_container_width=True)
+    else:
+        st.info("Nema narudžbina.")
 
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
