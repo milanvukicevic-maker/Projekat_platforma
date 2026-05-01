@@ -104,9 +104,42 @@ with tab_kupac:
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudzbenica:
         df_k = pd.DataFrame(st.session_state.narudzbenica)
-        prikaz_kupac = df_k[["kupac", "artikl", "kolicina_tražena", "status"]].copy()
-        prikaz_kupac.columns = ["Kupac", "Artikl", "Količina", "Status"]
-        st.dataframe(prikaz_kupac, hide_index=True, use_container_width=True)
+
+        df_prihvacene = df_k[df_k["status"] == "Prihvaćeno"].copy()
+
+        if not df_prihvacene.empty:
+            df_prihvacene["Ukupno"] = (
+                pd.to_numeric(df_prihvacene["kolicina_tražena"], errors="coerce").fillna(0)
+                * pd.to_numeric(df_prihvacene["cena"], errors="coerce").fillna(0)
+            )
+
+            prikaz_kupac = df_prihvacene[[
+                "kupac",
+                "artikl",
+                "kolicina_tražena",
+                "cena",
+                "Ukupno",
+                "status"
+            ]].copy()
+
+            prikaz_kupac.columns = ["Kupac", "Artikl", "Količina", "Cena", "Ukupno", "Status"]
+
+            total_sum = prikaz_kupac["Ukupno"].sum()
+
+            total_row = pd.DataFrame([{
+                "Kupac": "",
+                "Artikl": "",
+                "Količina": "",
+                "Cena": "Zbir",
+                "Ukupno": total_sum,
+                "Status": ""
+            }])
+
+            prikaz_sa_totalom = pd.concat([prikaz_kupac, total_row], ignore_index=True)
+
+            st.dataframe(prikaz_sa_totalom, hide_index=True, use_container_width=True)
+        else:
+            st.info("Nema prihvaćenih narudžbina.")
     else:
         st.info("Nema narudžbina.")
 
@@ -157,11 +190,11 @@ with tab_dobavljac:
             if c2.button("✅", key=f"ok_{stavka['id']}"):
                 if st.session_state.narudzbenica[i]["status"] == "Čeka":
                     orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
-                    trazeno = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
+                    kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
+                    trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
+                    novo_stanje = trenutno - kolicina_za_smanjenje
 
-                    novo_stanje = int(st.session_state.df_dobavljaci.at[orig_idx, "kolicina"]) - trazeno
-                    st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] = novo_stanje
-
+                    st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = novo_stanje
                     st.session_state.narudzbenica[i]["kolicina_preostala"] = novo_stanje
                     st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
 
