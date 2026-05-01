@@ -112,63 +112,62 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
-    moj_dobavljac = "Meso-Prom d.o.o."
-
-    moje_narudzbine = [
-        n for n in st.session_state.narudzbenica
-        if n.get("dobavljac") == moj_dobavljac
-    ]
-
-    st.subheader("Moje narudžbine")
-
-    if moje_narudzbine:
-        df_moje = pd.DataFrame(moje_narudzbine)
-
-        prikaz = df_moje[[
-            "kupac",
-            "artikl",
-            "kolicina_tražena",
-            "kolicina",
-            "cena",
-            "status"
-        ]].copy()
-
-        prikaz.columns = [
-            "Kupac",
-            "Artikl",
-            "Količina",
-            "Raspoloživa količina",
-            "Cena",
-            "Status"
+    if st.session_state.narudzbenica:
+        moje_narudzbine = [
+            n for n in st.session_state.narudzbenica
+            if n.get("dobavljac") == "Meso-Prom d.o.o."
         ]
 
-        st.dataframe(prikaz, hide_index=True, use_container_width=True)
+        if moje_narudzbine:
+            df_narudzbenica = pd.DataFrame(moje_narudzbine)
 
-        st.subheader("Akcije po narudžbini")
-        for i, stavka in enumerate(st.session_state.narudzbenica):
-            if stavka.get("dobavljac") != moj_dobavljac:
-                continue
+            prikaz = df_narudzbenica[[
+                "kupac",
+                "artikl",
+                "kolicina_tražena",
+                "kolicina",
+                "cena",
+                "status"
+            ]].copy()
 
-            c1, c2, c3 = st.columns([5, 1, 1])
+            prikaz.columns = [
+                "Kupac",
+                "Artikl",
+                "Količina",
+                "Raspoloživa količina",
+                "Cena",
+                "Status"
+            ]
 
-            c1.write(
-                f"{stavka['kupac']} | {stavka['artikl']} | "
-                f"{stavka['kolicina_tražena']} | {stavka['kolicina']} | "
-                f"{stavka['cena']} | {stavka['status']}"
-            )
+            st.dataframe(prikaz, hide_index=True, use_container_width=True)
 
-            if c2.button("✅", key=f"ok_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                    orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
-                    kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
-                    trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
-                    st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
-                    st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
-                st.rerun()
+            st.subheader("Akcije po narudžbini")
+            for i, stavka in enumerate(st.session_state.narudzbenica):
+                if stavka.get("dobavljac") != "Meso-Prom d.o.o.":
+                    continue
 
-            if c3.button("❌", key=f"no_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                    st.session_state.narudzbenica[i]["status"] = "Odbijeno"
-                st.rerun()
+                c1, c2, c3 = st.columns([5, 1, 1])
+
+                c1.write(
+                    f"{stavka['kupac']} | {stavka['artikl']} | "
+                    f"{stavka['kolicina_tražena']} | {stavka['kolicina']} | "
+                    f"{stavka['cena']} | {stavka['status']}"
+                )
+
+                if c2.button("✅", key=f"ok_{stavka['id']}"):
+                    if st.session_state.narudzbenica[i]["status"] == "Čeka":
+                        orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
+                        kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
+                        trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
+                        st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
+                        st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
+                    st.rerun()
+
+                if c3.button("❌", key=f"no_{stavka['id']}"):
+                    if st.session_state.narudzbenica[i]["status"] == "Čeka":
+                        st.session_state.narudzbenica[i]["status"] = "Odbijeno"
+                    st.rerun()
+        else:
+            st.info("Nema zahteva za ovog dobavljača.")
     else:
-        st.info("Nema zahteva za ovog dobavljača.")
+        st.info("Nema zahteva.")
