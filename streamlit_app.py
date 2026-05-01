@@ -112,27 +112,43 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
-    prikaz_dobavljaci = st.session_state.df_dobavljaci[[
-        "dobavljac",
-        "artikl",
-        "kolicina",
-        "cena",
-        "poeni"
-    ]].copy()
+    moj_dobavljac = "Meso-Prom d.o.o."
 
-    prikaz_dobavljaci.columns = [
-        "Dobavljač",
-        "Artikl",
-        "Raspoloživa količina",
-        "Cena",
-        "Poeni"
+    moje_narudzbine = [
+        n for n in st.session_state.narudzbenica
+        if n.get("dobavljac") == moj_dobavljac
     ]
 
-    st.dataframe(prikaz_dobavljaci, hide_index=True, use_container_width=True)
+    st.subheader("Moje narudžbine")
 
-    if st.session_state.narudzbenica:
-        st.subheader("Zahtevi")
+    if moje_narudzbine:
+        df_moje = pd.DataFrame(moje_narudzbine)
+
+        prikaz = df_moje[[
+            "kupac",
+            "artikl",
+            "kolicina_tražena",
+            "kolicina",
+            "cena",
+            "status"
+        ]].copy()
+
+        prikaz.columns = [
+            "Kupac",
+            "Artikl",
+            "Količina",
+            "Raspoloživa količina",
+            "Cena",
+            "Status"
+        ]
+
+        st.dataframe(prikaz, hide_index=True, use_container_width=True)
+
+        st.subheader("Akcije po narudžbini")
         for i, stavka in enumerate(st.session_state.narudzbenica):
+            if stavka.get("dobavljac") != moj_dobavljac:
+                continue
+
             c1, c2, c3 = st.columns([5, 1, 1])
 
             c1.write(
@@ -155,4 +171,4 @@ with tab_dobavljac:
                     st.session_state.narudzbenica[i]["status"] = "Odbijeno"
                 st.rerun()
     else:
-        st.info("Nema zahteva.")
+        st.info("Nema zahteva za ovog dobavljača.")
