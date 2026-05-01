@@ -112,6 +112,9 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
+    st.subheader("Kontrola baze dobavljača")
+    st.dataframe(st.session_state.df_dobavljaci, hide_index=True, use_container_width=True)
+
     if st.session_state.narudzbenica:
         df_narudzbenica = pd.DataFrame(st.session_state.narudzbenica)
 
@@ -149,9 +152,15 @@ with tab_dobavljac:
                 if st.session_state.narudzbenica[i]["status"] == "Čeka":
                     orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
                     kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
-                    trenutno = int(st.session_state.df_dobavljaci.at[orig_idx, "kolicina"])
-                    st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
+                    trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
+                    st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
                     st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
+
+                    st.write("DEBUG UMANJENJE:")
+                    st.write("orig_idx:", orig_idx)
+                    st.write("smanjenje:", kolicina_za_smanjenje)
+                    st.write("nova količina:", st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
+
                 st.rerun()
 
             if c3.button("❌", key=f"no_{stavka['id']}"):
