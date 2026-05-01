@@ -65,7 +65,7 @@ with tab_kupac:
                 key="dobavljac_widget"
             )
 
-            tražena_kol = st.number_input(
+            trazena_kol = st.number_input(
                 "Količina (kg):",
                 min_value=1,
                 step=1,
@@ -84,13 +84,14 @@ with tab_kupac:
                     idx = st.session_state.df_dobavljaci[mask].index[0]
                     dostupno = int(st.session_state.df_dobavljaci.at[idx, "kolicina"])
 
-                    if tražena_kol <= dostupno:
+                    if int(trazena_kol) <= dostupno:
                         stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
                         stavka.update({
                             "id": f"{int(time.time())}_{idx}",
                             "kupac": st.session_state.kupac_sel,
                             "artikl": st.session_state.artikl_sel,
-                            "kolicina_tražena": int(tražena_kol),
+                            "kolicina_tražena": int(trazena_kol),
+                            "kolicina_preostala": dostupno,
                             "status": "Čeka",
                             "_orig_idx": int(idx),
                         })
@@ -112,62 +113,63 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
-    if st.session_state.narudzbenica:
-        moje_narudzbine = [
-            n for n in st.session_state.narudzbenica
-            if n.get("dobavljac") == "Meso-Prom d.o.o."
+    moje_narudzbine = [
+        n for n in st.session_state.narudzbenica
+        if n.get("dobavljac") == "Meso-Prom d.o.o."
+    ]
+
+    if moje_narudzbine:
+        df_narudzbenica = pd.DataFrame(moje_narudzbine)
+
+        prikaz = df_narudzbenica[[
+            "kupac",
+            "artikl",
+            "kolicina_tražena",
+            "kolicina_preostala",
+            "cena",
+            "status"
+        ]].copy()
+
+        prikaz.columns = [
+            "Kupac",
+            "Artikl",
+            "Količina",
+            "Raspoloživo",
+            "Cena",
+            "Status"
         ]
 
-        if moje_narudzbine:
-            df_narudzbenica = pd.DataFrame(moje_narudzbine)
+        st.dataframe(prikaz, hide_index=True, use_container_width=True)
 
-            prikaz = df_narudzbenica[[
-                "kupac",
-                "artikl",
-                "kolicina_tražena",
-                "kolicina",
-                "cena",
-                "status"
-            ]].copy()
+        st.subheader("Akcije po narudžbini")
+        for i, stavka in enumerate(st.session_state.narudzbenica):
+            if stavka.get("dobavljac") != "Meso-Prom d.o.o.":
+                continue
 
-            prikaz.columns = [
-                "Kupac",
-                "Artikl",
-                "Količina",
-                "Raspoloživa količina",
-                "Cena",
-                "Status"
-            ]
+            c1, c2, c3 = st.columns([5, 1, 1])
 
-            st.dataframe(prikaz, hide_index=True, use_container_width=True)
+            c1.write(
+                f"{stavka['kupac']} | {stavka['artikl']} | "
+                f"{stavka['kolicina_tražena']} | {stavka['kolicina_preostala']} | "
+                f"{stavka['cena']} | {stavka['status']}"
+            )
 
-            st.subheader("Akcije po narudžbini")
-            for i, stavka in enumerate(st.session_state.narudzbenica):
-                if stavka.get("dobavljac") != "Meso-Prom d.o.o.":
-                    continue
+            if c2.button("✅", key=f"ok_{stavka['id']}"):
+                if st.session_state.narudzbenica[i]["status"] == "Čeka":
+                    orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
+                    trazeno = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
 
-                c1, c2, c3 = st.columns([5, 1, 1])
+                    novo_stanje = int(st.session_state.df_dobavljaci.at[orig_idx, "kolicina"]) - trazeno
+                    st.session_state.df_dobavljaci.at[orig_idx, "kolicina"] = novo_stanje
 
-                c1.write(
-                    f"{stavka['kupac']} | {stavka['artikl']} | "
-                    f"{stavka['kolicina_tražena']} | {stavka['kolicina']} | "
-                    f"{stavka['cena']} | {stavka['status']}"
-                )
+                    st.session_state.narudzbenica[i]["kolicina_preostala"] = novo_stanje
+                    st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
 
-                if c2.button("✅", key=f"ok_{stavka['id']}"):
-                    if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                        orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
-                        kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
-                        trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
-                        st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = trenutno - kolicina_za_smanjenje
-                        st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
-                    st.rerun()
+                st.rerun()
 
-                if c3.button("❌", key=f"no_{stavka['id']}"):
-                    if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                        st.session_state.narudzbenica[i]["status"] = "Odbijeno"
-                    st.rerun()
-        else:
-            st.info("Nema zahteva za ovog dobavljača.")
+            if c3.button("❌", key=f"no_{stavka['id']}"):
+                if st.session_state.narudzbenica[i]["status"] == "Čeka":
+                    st.session_state.narudzbenica[i]["status"] = "Odbijeno"
+                st.rerun()
     else:
         st.info("Nema zahteva.")
