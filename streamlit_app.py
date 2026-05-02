@@ -7,17 +7,44 @@ st.title("KAIZA B2B Platforma")
 
 if "df_dobavljaci" not in st.session_state:
     st.session_state.df_dobavljaci = pd.DataFrame([
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "But", "kolicina": 200, "cena": 1400, "poeni": 85},
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Juneći Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
+        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Juneći Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Svinjski But bk", "kolicina": 200, "cena": 1400, "poeni": 85},
         {"dobavljac": "Green Market", "artikl": "Paradajz", "kolicina": 300, "cena": 220, "poeni": 88},
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Piletina file", "kolicina": 120, "cena": 980, "poeni": 87},
+        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Juneći But bk", "kolicina": 350, "cena": 1420, "poeni": 89},
+        {"dobavljac": "Green Market", "artikl": "Krastavac", "kolicina": 420, "cena": 180, "poeni": 86},
+        {"dobavljac": "Bio Garden", "artikl": "Paprika", "kolicina": 260, "cena": 240, "poeni": 84},
+        {"dobavljac": "Fresh Point", "artikl": "Krompir", "kolicina": 500, "cena": 95, "poeni": 82},
+        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Pileći Batak", "kolicina": 180, "cena": 760, "poeni": 88},
     ])
 
 if "narudzbenica" not in st.session_state:
     st.session_state.narudzbenica = []
 
-df_artikli = pd.DataFrame({"Artikl": ["Ramstek", "But", "Paradajz"]})
-df_kupci = pd.DataFrame({"Naziv_Firme": ["Hotel Moskva", "Restoran Dunav"]})
+df_artikli = pd.DataFrame({
+    "Artikl": [
+        "Juneći Ramstek",
+        "Svinjski But bk",
+        "Piletina file",
+        "Juneći But bk",
+        "Pileći Batak",
+        "Paradajz",
+        "Krastavac",
+        "Paprika",
+        "Krompir"
+    ]
+})
+
+df_kupci = pd.DataFrame({
+    "Naziv_Firme": [
+        "Hotel Moskva",
+        "Restoran Dunav",
+        "Hotel Park",
+        "Villa Breg",
+        "Restoran Central"
+    ]
+})
 
 tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
 
