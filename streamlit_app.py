@@ -135,6 +135,7 @@ with tab_kupac:
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudzbenica:
         df_k = pd.DataFrame(st.session_state.narudzbenica)
+
         df_prihvacene = df_k[df_k["status"] == "Prihvaćeno"].copy()
 
         if not df_prihvacene.empty:
@@ -175,16 +176,14 @@ with tab_kupac:
 with tab_dobavljac:
     st.header("Upravljačka tabla — DOBAVLJAČ")
 
-    moje_narudzbine = [
-        n for n in st.session_state.narudzbenica
-        if n.get("dobavljac") == "Meso-Prom d.o.o."
-    ]
+    moje_narudzbine = st.session_state.narudzbenica
 
     if moje_narudzbine:
         df_narudzbenica = pd.DataFrame(moje_narudzbine)
 
         prikaz = df_narudzbenica[[
             "kupac",
+            "dobavljac",
             "artikl",
             "kolicina_tražena",
             "kolicina_preostala",
@@ -194,6 +193,7 @@ with tab_dobavljac:
 
         prikaz.columns = [
             "Kupac",
+            "Dobavljač",
             "Artikl",
             "Količina",
             "Raspoloživo",
@@ -205,15 +205,13 @@ with tab_dobavljac:
 
         st.subheader("Akcije po narudžbini")
         for i, stavka in enumerate(st.session_state.narudzbenica):
-            if stavka.get("dobavljac") != "Meso-Prom d.o.o.":
-                continue
-
             c1, c2, c3 = st.columns([5, 1, 1])
 
             c1.write(
-                f"{stavka['kupac']} | {stavka['artikl']} | "
-                f"{stavka['kolicina_tražena']} | {stavka['kolicina_preostala']} | "
-                f"{stavka['cena']} | {stavka['status']}"
+                f"{stavka.get('kupac', '')} | {stavka.get('dobavljac', '')} | "
+                f"{stavka.get('artikl', '')} | {stavka.get('kolicina_tražena', '')} | "
+                f"{stavka.get('kolicina_preostala', '')} | {stavka.get('cena', '')} | "
+                f"{stavka.get('status', '')}"
             )
 
             if c2.button("✅", key=f"ok_{stavka['id']}"):
