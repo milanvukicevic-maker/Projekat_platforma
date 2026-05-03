@@ -36,7 +36,7 @@ df_artikli = pd.DataFrame({
         "Krastavac",
         "Paprika",
         "Krompir",
-        "Kupus"
+        "Kupus",
         "Šargarepa"
     ]
 })
