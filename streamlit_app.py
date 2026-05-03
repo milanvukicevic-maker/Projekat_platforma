@@ -17,9 +17,9 @@ if "df_dobavljaci" not in st.session_state:
         {"dobavljac": "Bio Garden", "artikl": "Paprika", "kolicina": 260, "cena": 240, "poeni": 84},
         {"dobavljac": "Fresh Point", "artikl": "Krompir", "kolicina": 500, "cena": 95, "poeni": 82},
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Pileći Batak", "kolicina": 180, "cena": 760, "poeni": 88},
-        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Povrće", "kolicina": 999, "cena": 300, "poeni": 80},
-        {"dobavljac": "Green Market", "artikl": "Povrće", "kolicina": 999, "cena": 280, "poeni": 81},
-        {"dobavljac": "Bio Garden", "artikl": "Povrće", "kolicina": 999, "cena": 290, "poeni": 82},
+        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Kupus", "kolicina": 200, "cena": 300, "poeni": 80},
+        {"dobavljac": "Green Market", "artikl": "Šargarepa", "kolicina": 300, "cena": 280, "poeni": 81},
+        {"dobavljac": "Bio Garden", "artikl": "Kupus", "kolicina": 220, "cena": 290, "poeni": 82},
     ])
 
 if "narudzbenica" not in st.session_state:
@@ -36,7 +36,8 @@ df_artikli = pd.DataFrame({
         "Krastavac",
         "Paprika",
         "Krompir",
-        "Povrće"
+        "Kupus"
+        "Šargarepa"
     ]
 })
 
