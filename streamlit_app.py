@@ -17,6 +17,9 @@ if "df_dobavljaci" not in st.session_state:
         {"dobavljac": "Bio Garden", "artikl": "Paprika", "kolicina": 260, "cena": 240, "poeni": 84},
         {"dobavljac": "Fresh Point", "artikl": "Krompir", "kolicina": 500, "cena": 95, "poeni": 82},
         {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Pileći Batak", "kolicina": 180, "cena": 760, "poeni": 88},
+        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Povrće", "kolicina": 999, "cena": 300, "poeni": 80},
+        {"dobavljac": "Green Market", "artikl": "Povrće", "kolicina": 999, "cena": 280, "poeni": 81},
+        {"dobavljac": "Bio Garden", "artikl": "Povrće", "kolicina": 999, "cena": 290, "poeni": 82},
     ])
 
 if "narudzbenica" not in st.session_state:
@@ -25,14 +28,15 @@ if "narudzbenica" not in st.session_state:
 df_artikli = pd.DataFrame({
     "Artikl": [
         "Juneći Ramstek",
+        "Juneći But bk",
         "Svinjski But bk",
         "Piletina file",
-        "Juneći But bk",
         "Pileći Batak",
         "Paradajz",
         "Krastavac",
         "Paprika",
-        "Krompir"
+        "Krompir",
+        "Povrće"
     ]
 })
 
@@ -131,7 +135,6 @@ with tab_kupac:
     st.subheader("Vaša narudžbenica")
     if st.session_state.narudzbenica:
         df_k = pd.DataFrame(st.session_state.narudzbenica)
-
         df_prihvacene = df_k[df_k["status"] == "Prihvaćeno"].copy()
 
         if not df_prihvacene.empty:
@@ -163,7 +166,6 @@ with tab_kupac:
             }])
 
             prikaz_sa_totalom = pd.concat([prikaz_kupac, total_row], ignore_index=True)
-
             st.dataframe(prikaz_sa_totalom, hide_index=True, use_container_width=True)
         else:
             st.info("Nema prihvaćenih narudžbina.")
