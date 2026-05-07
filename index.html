@@ -111,6 +111,29 @@
       color: var(--white) !important;
     }
 
+.hero-cta {
+  display: inline-block;
+  align-self: flex-start;
+  margin: 0.5rem 0 2rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgba(181,129,58,0.5);
+  border-radius: 0;
+  background: transparent;
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.hero-cta:hover {
+  transform: translateY(-1px);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
     /* ── LEVA STRANA — TEKST ───────────────────────────── */
     .hero-text {
       grid-column: 1;
@@ -191,7 +214,7 @@
       background: var(--gold);
       margin: 0.8rem 0;
     }
- <a href="LINK_DO_STREAMLIT_APLIKACIJE" class="hero-cta">Otvorite prototip</a>
+ <a href="https://kaiza-app.streamlit.app" class="hero-cta">Otvorite prototip</a>
 
 <div class="stats">
   <div class="stat-item">
