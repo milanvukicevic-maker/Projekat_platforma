@@ -1,4 +1,20 @@
 import streamlit as st
+
+PASSWORD = "796027Mrv"
+
+if "authed" not in st.session_state:
+    st.session_state.authed = False
+
+if not st.session_state.authed:
+    st.title("KAIZA Access")
+    pwd = st.text_input("Unesi lozinku", type="password")
+    if st.button("Uđi"):
+        if pwd == PASSWORD:
+            st.session_state.authed = True
+            st.rerun()
+        else:
+            st.error("Pogrešna lozinka.")
+    st.stop()
 import pandas as pd
 import time
 
