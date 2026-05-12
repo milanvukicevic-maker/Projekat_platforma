@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="sr">
 <head>
@@ -10,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
 
   <style>
+    /* ── RESET & VARIJABLE ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -33,6 +35,7 @@
       overflow-x: hidden;
     }
 
+    /* ── POZADINSKA TEKSTURA ───────────────────────────── */
     body::before {
       content: '';
       position: fixed;
@@ -44,6 +47,7 @@
       z-index: 0;
     }
 
+    /* ── LAYOUT ────────────────────────────────────────── */
     .page {
       position: relative;
       z-index: 1;
@@ -55,6 +59,7 @@
       margin: 0 auto;
     }
 
+    /* ── HEADER ────────────────────────────────────────── */
     header {
       grid-column: 1 / -1;
       display: flex;
@@ -107,6 +112,30 @@
       color: var(--white) !important;
     }
 
+.hero-cta {
+  display: inline-block;
+  align-self: flex-start;
+  margin: 0.5rem 0 2rem;
+  padding: 0.7rem 1.2rem;
+  border: 1px solid rgba(181,129,58,0.5);
+  border-radius: 0;
+  background: transparent;
+  color: var(--gold);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+.hero-cta:hover {
+  transform: translateY(-1px);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+    /* ── LEVA STRANA — TEKST ───────────────────────────── */
     .hero-text {
       grid-column: 1;
       grid-row: 2;
@@ -145,6 +174,7 @@
       color: var(--gold);
     }
 
+    /* ── PORUKA KAIZA ──────────────────────────────────── */
     .kaiza-message {
       border-left: 2px solid var(--gold);
       padding-left: 1.5rem;
@@ -162,6 +192,7 @@
 
     .kaiza-message p:last-child { margin-bottom: 0; }
 
+    /* ── HAIKU ─────────────────────────────────────────── */
     .haiku {
       margin-bottom: 3rem;
       animation: fadeInLeft 1.4s ease 0.4s both;
@@ -184,33 +215,23 @@
       background: var(--gold);
       margin: 0.8rem 0;
     }
+ <a href="https://kaiza-app.streamlit.app" class="hero-cta">Otvorite prototip</a>
 
-    .hero-cta {
-      display: inline-block;
-      align-self: flex-start;
-      margin: 0.8rem 0 2rem;
-      padding: 0.9rem 1.7rem;
-      border: 1px solid var(--gold);
-      border-radius: 999px;
-      background: var(--gold);
-      color: var(--white);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      position: relative;
-      z-index: 2;
-      transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
-    }
-
-    .hero-cta:hover {
-      transform: translateY(-2px);
-      background: var(--gold-light);
-      border-color: var(--gold-light);
-      color: var(--ink);
-    }
-
+<div class="stats">
+  <div class="stat-item">
+    <span class="stat-number">650k+</span>
+    <span class="stat-label">Registrovanih entiteta</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">5.000+</span>
+    <span class="stat-label">Aktivnih objekata</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number">7</span>
+    <span class="stat-label">Javnih kriterijuma</span>
+  </div>
+</div>
+    /* ── STATS ─────────────────────────────────────────── */
     .stats {
       display: flex;
       gap: 2.5rem;
@@ -239,6 +260,7 @@
       margin-top: 0.3rem;
     }
 
+    /* ── DESNA STRANA — AVATAR ─────────────────────────── */
     .hero-visual {
       grid-column: 2;
       grid-row: 2;
@@ -261,6 +283,7 @@
       to   { opacity: 1; transform: translateX(0); }
     }
 
+    /* Sjaj ispod avatara */
     .hero-visual::before {
       content: '';
       position: absolute;
@@ -277,6 +300,7 @@
       z-index: 0;
     }
 
+    /* Dekorativni prsten */
     .hero-visual::after {
       content: '';
       position: absolute;
@@ -306,6 +330,7 @@
       filter: drop-shadow(0 24px 80px rgba(181,129,58,0.2));
     }
 
+    /* ── FOOTER ────────────────────────────────────────── */
     footer {
       grid-column: 1 / -1;
       display: flex;
@@ -335,6 +360,7 @@
       color: var(--gold);
     }
 
+    /* ── SEKCIJA: O PLATFORMI ──────────────────────────── */
     .section-platform {
       grid-column: 1 / -1;
       padding: 5rem 4rem;
@@ -405,6 +431,7 @@
       color: var(--ink-light);
     }
 
+    /* ── KONTAKT SEKCIJA ───────────────────────────────── */
     .section-contact {
       grid-column: 1 / -1;
       text-align: center;
@@ -447,6 +474,7 @@
       border-color: var(--white);
     }
 
+    /* ── RESPONZIVNO ───────────────────────────────────── */
     @media (max-width: 900px) {
       .page {
         grid-template-columns: 1fr;
@@ -489,16 +517,13 @@
       }
 
       nav { gap: 1.2rem; flex-wrap: wrap; justify-content: center; }
-
-      .hero-cta {
-        align-self: flex-start;
-      }
     }
   </style>
 </head>
 <body>
 <div class="page">
 
+  <!-- HEADER -->
   <header>
     <div class="logo">KAI<span>ZA</span></div>
     <nav>
@@ -507,7 +532,9 @@
     </nav>
   </header>
 
+  <!-- HERO LEVO — TEKST -->
   <section class="hero-text">
+
     <p class="overline">B2B tržišna mreža · HoReCa sektor</p>
 
     <h1 class="tagline">
@@ -530,8 +557,6 @@
       <div class="haiku-separator"></div>
     </div>
 
-  <a href="https://projekatplatforma-gfojwbswlasvhoutm8xkpd.streamlit.app/" class="hero-cta">Otvorite prototip</a>
-
     <div class="stats">
       <div class="stat-item">
         <span class="stat-number">650k+</span>
@@ -542,12 +567,14 @@
         <span class="stat-label">Aktivnih objekata</span>
       </div>
       <div class="stat-item">
-        <span class="stat-number">7</span>
-        <span class="stat-label">Javnih kriterijuma</span>
+        <span class="stat-number">Kompanijska</span>
+        <span class="stat-label">Inteligencija</span>
       </div>
     </div>
+
   </section>
 
+  <!-- HERO DESNO — AVATAR -->
   <section class="hero-visual">
     <img
       src="kaiza_avatar.png"
@@ -556,15 +583,17 @@
     />
   </section>
 
+  <!-- FOOTER -->
   <footer>
-    <span class="footer-left">© 2025 KAIZA · kaiza.rs</span>
+    <span class="footer-left">© 2026 KAIZA · kaiza.rs</span>
     <span class="footer-right">milan.vukicevic@kaiza.rs</span>
   </footer>
 
+  <!-- SEKCIJA: PLATFORMA -->
   <section class="section-platform" id="platforma">
     <div class="platform-intro">
       <h2>Kako KAIZA funkcioniše</h2>
-      <p>Svaki entitet definiše svojih 7 javnih kriterijuma. Matching nije crna kutija. Niko nije privilegovan.</p>
+      <p>Kompanijska inteligencija meri uspešnost klijenta. Matching nije crna kutija. Niko nije privilegovan.</p>
     </div>
 
     <div class="pillar">
@@ -586,6 +615,7 @@
     </div>
   </section>
 
+  <!-- KONTAKT -->
   <section class="section-contact" id="kontakt">
     <h2>Razgovarajmo</h2>
     <p>Platforma je u razvoju · Seed runda · 35.000 – 65.000 EUR</p>
@@ -593,5 +623,4 @@
   </section>
 
 </div>
-</body>
-</html>
+
