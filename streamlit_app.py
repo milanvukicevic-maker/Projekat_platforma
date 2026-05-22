@@ -1,4 +1,23 @@
+# =========================================================
+# HOME + OPERATIVNI MODUL
+# =========================================================
+
 import streamlit as st
+import pandas as pd
+import time
+
+# =========================================================
+# CONFIG
+# =========================================================
+
+st.set_page_config(
+    page_title="KAIZA",
+    layout="wide"
+)
+
+# =========================================================
+# PASSWORD
+# =========================================================
 
 PASSWORD = "796027Mrv"
 
@@ -6,247 +25,604 @@ if "authed" not in st.session_state:
     st.session_state.authed = False
 
 if not st.session_state.authed:
-    st.title("KAIZA Access")
-    pwd = st.text_input("Unesi lozinku", type="password")
-    if st.button("Uđi"):
+
+    st.title("KAIZA")
+
+    st.subheader(
+        "Signal-driven B2B platforma"
+    )
+
+    pwd = st.text_input(
+        "Pristupna lozinka",
+        type="password"
+    )
+
+    if st.button("Pristupi platformi"):
+
         if pwd == PASSWORD:
+
             st.session_state.authed = True
             st.rerun()
-        else:
-            st.error("Pogrešna lozinka.")
-    st.stop()
-import pandas as pd
-import time
 
-st.set_page_config(page_title="KAIZA B2B", layout="wide")
-st.title("KAIZA B2B Platforma")
+        else:
+
+            st.error("Pogrešna lozinka.")
+
+    st.stop()
+
+# =========================================================
+# DATA
+# =========================================================
 
 if "df_dobavljaci" not in st.session_state:
+
     st.session_state.df_dobavljaci = pd.DataFrame([
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Juneći Ramstek", "kolicina": 150, "cena": 1850, "poeni": 91},
-        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Juneći Ramstek", "kolicina": 500, "cena": 1700, "poeni": 90},
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Svinjski But bk", "kolicina": 200, "cena": 1400, "poeni": 85},
-        {"dobavljac": "Green Market", "artikl": "Paradajz", "kolicina": 300, "cena": 220, "poeni": 88},
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Piletina file", "kolicina": 120, "cena": 980, "poeni": 87},
-        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Juneći But bk", "kolicina": 350, "cena": 1420, "poeni": 89},
-        {"dobavljac": "Green Market", "artikl": "Krastavac", "kolicina": 420, "cena": 180, "poeni": 86},
-        {"dobavljac": "Bio Garden", "artikl": "Paprika", "kolicina": 260, "cena": 240, "poeni": 84},
-        {"dobavljac": "Fresh Point", "artikl": "Krompir", "kolicina": 500, "cena": 95, "poeni": 82},
-        {"dobavljac": "Meso-Prom d.o.o.", "artikl": "Pileći Batak", "kolicina": 180, "cena": 760, "poeni": 88},
-        {"dobavljac": "Agro Fresh d.o.o.", "artikl": "Kupus", "kolicina": 200, "cena": 300, "poeni": 80},
-        {"dobavljac": "Green Market", "artikl": "Šargarepa", "kolicina": 300, "cena": 280, "poeni": 81},
-        {"dobavljac": "Bio Garden", "artikl": "Kupus", "kolicina": 220, "cena": 290, "poeni": 82},
+
+        {
+            "dobavljac": "Meso-Prom d.o.o.",
+            "artikl": "Juneći Ramstek",
+            "kolicina": 150,
+            "signalna_kolicina": 50,
+            "cena": 1850,
+            "poeni": 91,
+            "signal": "🟢 Stabilan"
+        },
+
+        {
+            "dobavljac": "Meat Fresh d.o.o.",
+            "artikl": "Juneći Ramstek",
+            "kolicina": 500,
+            "signalna_kolicina": 120,
+            "cena": 1700,
+            "poeni": 90,
+            "signal": "🟢 Stabilan"
+        },
+
+        {
+            "dobavljac": "Meso-Prom d.o.o.",
+            "artikl": "Svinjski file",
+            "kolicina": 300,
+            "signalna_kolicina": 80,
+            "cena": 1220,
+            "poeni": 88,
+            "signal": "🟢 Stabilan"
+        },
+
+        {
+            "dobavljac": "Bio Garden",
+            "artikl": "Paprika",
+            "kolicina": 260,
+            "signalna_kolicina": 70,
+            "cena": 240,
+            "poeni": 84,
+            "signal": "🟢 Stabilan"
+        },
+
     ])
 
 if "narudzbenica" not in st.session_state:
     st.session_state.narudzbenica = []
 
-df_artikli = pd.DataFrame({
-    "Artikl": [
-        "Juneći Ramstek",
-        "Juneći But bk",
-        "Svinjski But bk",
-        "Piletina file",
-        "Pileći Batak",
-        "Paradajz",
-        "Krastavac",
-        "Paprika",
-        "Krompir",
-        "Kupus",
-        "Šargarepa"
-    ]
-})
+# =========================================================
+# HOME SCREEN
+# =========================================================
 
-df_kupci = pd.DataFrame({
-    "Naziv_Firme": [
+st.title("KAIZA")
+
+st.caption(
+    "Signal_driven Operational Intelligence platform"
+)
+
+st.divider()
+
+# =========================================================
+# KPI
+# =========================================================
+
+k1, k2, k3, k4 = st.columns(4)
+
+k1.metric(
+    "Stabilnost mreže",
+    "89%"
+)
+
+k2.metric(
+    "Aktivne narudžbine",
+    len(st.session_state.narudzbenica)
+)
+
+k3.metric(
+    "Kritični artikli",
+    len(
+        st.session_state.df_dobavljaci[
+            st.session_state.df_dobavljaci["signal"]
+            == "🔴 Kritično"
+        ]
+    )
+)
+
+k4.metric(
+    "Proceduralna odstupanja",
+    "-22%"
+)
+
+st.divider()
+
+# =========================================================
+# SIGNAL CENTER
+# =========================================================
+
+st.subheader("📡 Signalni centar")
+
+s1, s2, s3 = st.columns(3)
+
+with s1:
+
+    st.error(
+        """
+        🔴 Kritično stanje
+
+        Rizik destabilizacije isporuke.
+        """
+    )
+
+with s2:
+
+    st.warning(
+        """
+        🟡 Povećano opterećenje
+
+        Količina se približava signalnoj zalihi.
+        """
+    )
+
+with s3:
+
+    st.success(
+        """
+        🟢 Stabilno stanje
+
+        Operativni tok stabilan.
+        """
+    )
+
+st.divider()
+
+# =========================================================
+# NETWORK OVERVIEW
+# =========================================================
+
+st.subheader("🌐 Pregled mreže")
+
+o1, o2 = st.columns(2)
+
+with o1:
+
+    st.info(
+        """
+        📦 OPERATIVNI TOK
+
+        Aktivni dobavljači: 18
+
+        Aktivni kupci: 42
+
+        Dnevni protok artikala: 126
+        """
+    )
+
+with o2:
+
+    st.info(
+        """
+        📊 ANALITIKA
+
+        Greške procesa: -37%
+
+        Kašnjenja isporuke: -21%
+
+        Operativni tok stabilan.
+        """
+    )
+
+st.divider()
+
+# =========================================================
+# OPERATIVNI MODUL
+# =========================================================
+
+st.header("🧭 Operativni modul")
+
+top_left, top_right = st.columns(2)
+bottom_left, bottom_right = st.columns(2)
+
+# =========================================================
+# KUPAC
+# =========================================================
+
+with top_left:
+
+    st.subheader("🍽 KUPAC")
+
+    kupci = [
         "Hotel Moskva",
         "Restoran Dunav",
         "Hotel Park",
         "Villa Breg",
         "Restoran Central"
     ]
-})
 
-tab_kupac, tab_dobavljac = st.tabs(["🛒 KUPAC", "🚛 DOBAVLJAČ"])
-
-with tab_kupac:
-    st.header("Upravljačka tabla — KUPAC")
-
-    if "kupac_sel" not in st.session_state:
-        st.session_state.kupac_sel = ""
-    if "artikl_sel" not in st.session_state:
-        st.session_state.artikl_sel = ""
-    if "dobavljac_sel" not in st.session_state:
-        st.session_state.dobavljac_sel = ""
-
-    st.session_state.kupac_sel = st.selectbox(
-        "Firma:",
-        [""] + df_kupci["Naziv_Firme"].tolist(),
-        key="kupac_widget"
+    artikli = sorted(
+        st.session_state.df_dobavljaci["artikl"].unique()
     )
 
-    st.session_state.artikl_sel = st.selectbox(
-        "Artikl:",
-        [""] + df_artikli["Artikl"].tolist(),
-        key="artikl_widget"
+    kupac = st.selectbox(
+        "Kupac",
+        [""] + kupci
     )
 
-    if st.session_state.kupac_sel and st.session_state.artikl_sel:
+    artikl = st.selectbox(
+        "Artikl",
+        [""] + artikli
+    )
+
+    if artikl != "":
+
         dostupni = st.session_state.df_dobavljaci[
-            st.session_state.df_dobavljaci["artikl"] == st.session_state.artikl_sel
-        ].copy()
+            st.session_state.df_dobavljaci["artikl"] == artikl
+        ]
 
-        if dostupni.empty:
-            st.info("Nema dobavljača za izabrani artikl.")
-        else:
-            dostupni = dostupni.reset_index().rename(columns={"index": "_orig_idx"})
+        st.write("### Potencijalni dobavljači")
+
+        st.dataframe(
+            dostupni[
+                [
+                    "dobavljac",
+                    "artikl",
+                    "kolicina",
+                    "signalna_kolicina",
+                    "cena",
+                    "poeni",
+                    "signal"
+                ]
+            ].rename(columns={"kolicina": "raspoloziva kolicina"}),
+            hide_index=True,
+            use_container_width=True
+        )
+
+        dobavljaci_lista = (
+            dostupni["dobavljac"]
+            .unique()
+            .tolist()
+        )
+
+        dobavljac = st.selectbox(
+            "Dobavljač",
+            [""] + dobavljaci_lista
+        )
+
+        kolicina = st.number_input(
+            "Količina",
+            min_value=1,
+            step=1
+        )
+
+        if st.button("📤 Pošalji narudžbinu"):
+
+            if (
+                kupac == ""
+                or artikl == ""
+                or dobavljac == ""
+            ):
+
+                st.warning(
+                    "Izaberite kupca, artikl i dobavljača."
+                )
+
+            else:
+
+                mask = (
+                    (
+                        st.session_state.df_dobavljaci["dobavljac"]
+                        ==
+                        dobavljac
+                    )
+                    &
+                    (
+                        st.session_state.df_dobavljaci["artikl"]
+                        ==
+                        artikl
+                    )
+                )
+
+                idx = st.session_state.df_dobavljaci[
+                    mask
+                ].index[0]
+
+                dostupno = int(
+                    st.session_state.df_dobavljaci.loc[
+                        idx,
+                        "kolicina"
+                    ]
+                )
+
+                if kolicina <= dostupno:
+
+                    stavka = (
+                        st.session_state.df_dobavljaci
+                        .loc[idx]
+                        .to_dict()
+                    )
+
+                    stavka.update({
+
+                        "id":
+                        f"{int(time.time())}_{idx}",
+
+                        "kupac":
+                        kupac,
+
+                        "kolicina_tražena":
+                        int(kolicina),
+
+                        "status":
+                        "Čeka",
+
+                        "_orig_idx":
+                        int(idx)
+
+                    })
+
+                    st.session_state.narudzbenica.append(
+                        stavka
+                    )
+
+                    st.success(
+                        "Narudžbina poslata."
+                    )
+
+                    st.rerun()
+
+                else:
+
+                    st.error(
+                        "Nedovoljno raspoložive količine."
+                    )
+
+
+# =========================================================
+# DOBAVLJAČ
+# =========================================================
+
+with top_right:
+
+    st.subheader("🚛 DOBAVLJAČ")
+
+    if st.session_state.narudzbenica:
+
+        # =========================================
+        # ZAHTEVI ZA OBRADU
+        # =========================================
+
+        st.write("### Aktivni zahtevi")
+
+        for i, stavka in enumerate(
+            st.session_state.narudzbenica
+        ):
+
+            if stavka["status"] != "Čeka":
+                continue
+
+            with st.container(border=True):
+
+                st.write(
+                    f"""
+                    Kupac: {stavka['kupac']}
+
+                    Artikl: {stavka['artikl']}
+
+                    Količina: {stavka['kolicina_tražena']}
+
+                    Status: {stavka['status']}
+                    """
+                )
+
+                c1, c2 = st.columns(2)
+
+                # =====================================
+                # PRIHVATI
+                # =====================================
+
+                if c1.button(
+                    "✅ Prihvati",
+                    key=f"ok_{stavka['id']}"
+                ):
+
+                    if stavka["status"] == "Čeka":
+
+                        orig_idx = stavka["_orig_idx"]
+
+                        trenutno = int(
+                            st.session_state
+                            .df_dobavljaci
+                            .loc[orig_idx, "kolicina"]
+                        )
+
+                        signalna = int(
+                            st.session_state
+                            .df_dobavljaci
+                            .loc[
+                                orig_idx,
+                                "signalna_kolicina"
+                            ]
+                        )
+
+                        nova_kolicina = (
+                            trenutno
+                            -
+                            int(
+                                stavka[
+                                    "kolicina_tražena"
+                                ]
+                            )
+                        )
+
+                        # UPDATE KOLIČINE
+
+                        st.session_state.df_dobavljaci.loc[
+                            orig_idx,
+                            "kolicina"
+                        ] = nova_kolicina
+
+                        # UPDATE SIGNALA
+
+                        if nova_kolicina <= signalna:
+
+                            novi_signal = "🔴 Kritično"
+
+                        elif (
+                            nova_kolicina
+                            <=
+                            signalna * 1.5
+                        ):
+
+                            novi_signal = "🟡 Upozorenje"
+
+                        else:
+
+                            novi_signal = "🟢 Stabilan"
+
+                        st.session_state.df_dobavljaci.loc[
+                            orig_idx,
+                            "signal"
+                        ] = novi_signal
+
+                        # STATUS
+
+                        st.session_state.narudzbenica[i][
+                            "status"
+                        ] = "Prihvaćeno"
+
+                        st.rerun()
+
+                # =====================================
+                # ODBIJ
+                # =====================================
+
+                if c2.button(
+                    "❌ Odbij",
+                    key=f"no_{stavka['id']}"
+                ):
+
+                    if stavka["status"] == "Čeka":
+
+                        st.session_state.narudzbenica[i][
+                            "status"
+                        ] = "Odbijeno"
+
+                        st.rerun()
+
+        # =========================================
+        # ISPORUČENE NARUDŽBINE
+        # =========================================
+
+        st.divider()
+
+        st.write("### 📦 Prihvaćene narudžbine dobavljača")
+
+        df_isporuke = pd.DataFrame(
+            st.session_state.narudzbenica
+        )
+
+        df_isporuke = df_isporuke[
+            df_isporuke["status"] == "Prihvaćeno"
+        ]
+
+        if not df_isporuke.empty:
+
+            df_isporuke["Ukupno"] = (
+                df_isporuke["kolicina_tražena"]
+                *
+                df_isporuke["cena"]
+            )
+
+            prikaz_isporuke = df_isporuke[
+                [
+                    "dobavljac",
+                    "kupac",
+                    "artikl",
+                    "kolicina_tražena",
+                    "cena",
+                    "Ukupno"
+                ]
+            ].copy()
+
+            prikaz_isporuke.columns = [
+                "Dobavljač",
+                "Kupac",
+                "Artikl",
+                "Količina",
+                "Cena",
+                "Ukupno"
+            ]
 
             st.dataframe(
-                dostupni[["dobavljac", "artikl", "kolicina", "cena", "poeni"]],
+                prikaz_isporuke,
                 hide_index=True,
                 use_container_width=True
             )
 
-            st.session_state.dobavljac_sel = st.selectbox(
-                "Dobavljač:",
-                dostupni["dobavljac"].tolist(),
-                key="dobavljac_widget"
-            )
-
-            trazena_kol = st.number_input(
-                "Količina (kg):",
-                min_value=1,
-                step=1,
-                key="kolicina_widget"
-            )
-
-            if st.button("Naruči", key="naruči_btn"):
-                mask = (
-                    (st.session_state.df_dobavljaci["dobavljac"] == st.session_state.dobavljac_sel) &
-                    (st.session_state.df_dobavljaci["artikl"] == st.session_state.artikl_sel)
-                )
-
-                if not mask.any():
-                    st.error("Odabrani dobavljač nije pronađen.")
-                else:
-                    idx = st.session_state.df_dobavljaci[mask].index[0]
-                    dostupno = int(st.session_state.df_dobavljaci.at[idx, "kolicina"])
-
-                    if int(trazena_kol) <= dostupno:
-                        stavka = st.session_state.df_dobavljaci.loc[idx].to_dict()
-                        stavka.update({
-                            "id": f"{int(time.time())}_{idx}",
-                            "kupac": st.session_state.kupac_sel,
-                            "artikl": st.session_state.artikl_sel,
-                            "kolicina_tražena": int(trazena_kol),
-                            "kolicina_preostala": dostupno,
-                            "status": "Čeka",
-                            "_orig_idx": int(idx),
-                        })
-                        st.session_state.narudzbenica.append(stavka)
-                        st.success("Narudžbina dodata.")
-                        st.rerun()
-                    else:
-                        st.error("Nedovoljno na stanju!")
-
-    st.subheader("Vaša narudžbenica")
-    if st.session_state.narudzbenica:
-        df_k = pd.DataFrame(st.session_state.narudzbenica)
-
-        df_prihvacene = df_k[df_k["status"] == "Prihvaćeno"].copy()
-
-        if not df_prihvacene.empty:
-            df_prihvacene["Ukupno"] = (
-                pd.to_numeric(df_prihvacene["kolicina_tražena"], errors="coerce").fillna(0)
-                * pd.to_numeric(df_prihvacene["cena"], errors="coerce").fillna(0)
-            )
-
-            prikaz_kupac = df_prihvacene[[
-                "kupac",
-                "artikl",
-                "kolicina_tražena",
-                "cena",
-                "Ukupno",
-                "status"
-            ]].copy()
-
-            prikaz_kupac.columns = ["Kupac", "Artikl", "Količina", "Cena", "Ukupno", "Status"]
-
-            total_sum = prikaz_kupac["Ukupno"].sum()
-
-            total_row = pd.DataFrame([{
-                "Kupac": "",
-                "Artikl": "",
-                "Količina": "",
-                "Cena": "Zbir",
-                "Ukupno": total_sum,
-                "Status": ""
-            }])
-
-            prikaz_sa_totalom = pd.concat([prikaz_kupac, total_row], ignore_index=True)
-            st.dataframe(prikaz_sa_totalom, hide_index=True, use_container_width=True)
         else:
-            st.info("Nema prihvaćenih narudžbina.")
-    else:
-        st.info("Nema narudžbina.")
 
-with tab_dobavljac:
-    st.header("Upravljačka tabla — DOBAVLJAČ")
-
-    moje_narudzbine = st.session_state.narudzbenica
-
-    if moje_narudzbine:
-        df_narudzbenica = pd.DataFrame(moje_narudzbine)
-
-        prikaz = df_narudzbenica[[
-            "kupac",
-            "dobavljac",
-            "artikl",
-            "kolicina_tražena",
-            "kolicina_preostala",
-            "cena",
-            "status"
-        ]].copy()
-
-        prikaz.columns = [
-            "Kupac",
-            "Dobavljač",
-            "Artikl",
-            "Količina",
-            "Raspoloživo",
-            "Cena",
-            "Status"
-        ]
-
-        st.dataframe(prikaz, hide_index=True, use_container_width=True)
-
-        st.subheader("Akcije po narudžbini")
-        for i, stavka in enumerate(st.session_state.narudzbenica):
-            c1, c2, c3 = st.columns([5, 1, 1])
-
-            c1.write(
-                f"{stavka.get('kupac', '')} | {stavka.get('dobavljac', '')} | "
-                f"{stavka.get('artikl', '')} | {stavka.get('kolicina_tražena', '')} | "
-                f"{stavka.get('kolicina_preostala', '')} | {stavka.get('cena', '')} | "
-                f"{stavka.get('status', '')}"
+            st.info(
+                "Nema realizovanih isporuka."
             )
 
-            if c2.button("✅", key=f"ok_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                    orig_idx = int(st.session_state.narudzbenica[i]["_orig_idx"])
-                    kolicina_za_smanjenje = int(st.session_state.narudzbenica[i]["kolicina_tražena"])
-                    trenutno = int(st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"])
-                    novo_stanje = trenutno - kolicina_za_smanjenje
-
-                    st.session_state.df_dobavljaci.loc[orig_idx, "kolicina"] = novo_stanje
-                    st.session_state.narudzbenica[i]["kolicina_preostala"] = novo_stanje
-                    st.session_state.narudzbenica[i]["status"] = "Prihvaćeno"
-
-                st.rerun()
-
-            if c3.button("❌", key=f"no_{stavka['id']}"):
-                if st.session_state.narudzbenica[i]["status"] == "Čeka":
-                    st.session_state.narudzbenica[i]["status"] = "Odbijeno"
-                st.rerun()
     else:
+
         st.info("Nema zahteva.")
+
+
+
+# =========================================================
+# STANJE SISTEMA
+# =========================================================
+
+with bottom_right:
+
+    st.subheader("📦 Stanje sistema")
+
+    st.dataframe(
+        st.session_state.df_dobavljaci[
+            [
+                "dobavljac",
+                "artikl",
+                "kolicina",
+                "signalna_kolicina",
+                "signal",
+                "poeni"
+            ]
+        ].rename(columns={"kolicina": "raspoloziva kolicina"}),
+        hide_index=True,
+        use_container_width=True
+    )
+
+    st.info(
+        """
+        ℹ️ SIGNAL STABILNOSTI
+
+        Signal predstavlja procenu operativne
+        stabilnosti artikla u mreži.
+
+        Kada količina padne ispod signalnog
+        praga povećava se rizik:
+        - kašnjenja,
+        - proceduralnih odstupanja,
+        - i destabilizacije isporuke.
+        """
+    )
+
+st.divider()
+
+st.caption(
+    "KAIZA • Signal-driven operational intelligence"
+)
